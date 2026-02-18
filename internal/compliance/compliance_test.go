@@ -1,4 +1,4 @@
-//   /    Context:                     https://ctx.ist
+﻿//   /    Context:                     https://ctx.ist
 // ,'`./    do you remember?
 // `.,'\
 //   \    Copyright 2026-present Context contributors.
@@ -40,6 +40,20 @@ func projectRoot(t *testing.T) string {
 	return root
 }
 
+// templateDir returns the path to the template/assets directory.
+// It supports both internal/assets (current) and internal/tpl (legacy).
+func templateDir(t *testing.T, root string) string {
+	t.Helper()
+	for _, name := range []string{"assets", "tpl"} {
+		d := filepath.Join(root, "internal", name)
+		if _, err := os.Stat(d); err == nil {
+			return d
+		}
+	}
+	t.Fatal("cannot find template dir (internal/assets or internal/tpl)")
+	return ""
+}
+
 // allGoFiles returns all .go files under the project root, excluding vendor/.
 func allGoFiles(t *testing.T, root string) []string {
 	t.Helper()
@@ -75,7 +89,7 @@ func nonTestGoFiles(t *testing.T, root string) []string {
 }
 
 // ---------------------------------------------------------------------------
-// 1. License Header ΓÇö every .go file must have the SPDX header
+// 1. License Header ╬ô├ç├╢ every .go file must have the SPDX header
 // ---------------------------------------------------------------------------
 
 // TestLicenseHeader verifies every .go file contains the Apache-2.0 SPDX
@@ -107,7 +121,7 @@ func TestLicenseHeader(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 2. Package doc.go ΓÇö every package under internal/ should have a doc.go
+// 2. Package doc.go ╬ô├ç├╢ every package under internal/ should have a doc.go
 // ---------------------------------------------------------------------------
 
 // TestDocGoExists verifies every Go package under internal/ has a doc.go.
@@ -173,7 +187,7 @@ func TestDocGoExists(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 3. No literal "\n" ΓÇö use config.NewlineLF instead (lint-drift rule 1)
+// 3. No literal "\n" ╬ô├ç├╢ use config.NewlineLF instead (lint-drift rule 1)
 // ---------------------------------------------------------------------------
 
 // TestNoLiteralNewline mirrors lint-drift rule 1: literal "\n" strings
@@ -201,7 +215,7 @@ func TestNoLiteralNewline(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. No literal ".md" ΓÇö use config.ExtMarkdown instead (lint-drift rule 4)
+// 4. No literal ".md" ╬ô├ç├╢ use config.ExtMarkdown instead (lint-drift rule 4)
 // ---------------------------------------------------------------------------
 
 // TestNoLiteralMdExtension mirrors lint-drift rule 4: literal ".md" strings
@@ -229,7 +243,7 @@ func TestNoLiteralMdExtension(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. No cmd.Printf/cmd.PrintErrf ΓÇö prefer Println (lint-drift rule 2)
+// 5. No cmd.Printf/cmd.PrintErrf ╬ô├ç├╢ prefer Println (lint-drift rule 2)
 // ---------------------------------------------------------------------------
 
 // TestNoCmdPrintf mirrors lint-drift rule 2: cmd.Printf/cmd.PrintErrf should
@@ -254,7 +268,7 @@ func TestNoCmdPrintf(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 6. No magic directory strings ΓÇö use config.Dir* constants (lint-drift rule 3)
+// 6. No magic directory strings ╬ô├ç├╢ use config.Dir* constants (lint-drift rule 3)
 // ---------------------------------------------------------------------------
 
 // TestNoMagicDirectoryStrings mirrors lint-drift rule 3: magic directory
@@ -290,7 +304,7 @@ func TestNoMagicDirectoryStrings(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 7. No direct fmt.Print* in Cobra command functions ΓÇö use cmd.Print*
+// 7. No direct fmt.Print* in Cobra command functions ╬ô├ç├╢ use cmd.Print*
 // ---------------------------------------------------------------------------
 
 // TestNoDirectFmtPrintInCobraHandlers parses CLI source files and verifies
@@ -376,7 +390,7 @@ func TestNoDirectFmtPrintInCobraHandlers(t *testing.T) {
 				if ident.Name == fmtAlias && forbidden[sel.Sel.Name] {
 					pos := fset.Position(call.Pos())
 					rel, _ := filepath.Rel(root, pos.Filename)
-					t.Errorf("%s:%d: fmt.%s in Cobra handler ΓÇö use cmd.Print* instead",
+					t.Errorf("%s:%d: fmt.%s in Cobra handler ╬ô├ç├╢ use cmd.Print* instead",
 						rel, pos.Line, sel.Sel.Name)
 				}
 				return true
@@ -390,7 +404,7 @@ func TestNoDirectFmtPrintInCobraHandlers(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 8. gofmt compliance ΓÇö all Go files must be properly formatted
+// 8. gofmt compliance ╬ô├ç├╢ all Go files must be properly formatted
 // ---------------------------------------------------------------------------
 
 // TestGofmt verifies all Go files are properly formatted.
@@ -429,7 +443,7 @@ func TestGofmt(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 9. go vet ΓÇö the entire project must pass go vet
+// 9. go vet ╬ô├ç├╢ the entire project must pass go vet
 // ---------------------------------------------------------------------------
 
 // TestGoVet runs go vet across the entire project with CGO disabled.
@@ -450,12 +464,12 @@ func TestGoVet(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 9b. golangci-lint ΓÇö the entire project must pass golangci-lint
+// 9b. golangci-lint ╬ô├ç├╢ the entire project must pass golangci-lint
 // ---------------------------------------------------------------------------
 
 // TestGolangciLint runs golangci-lint across the entire project.
 // This catches issues that go vet alone misses (gosec, goconst, unused, etc.).
-// golangci-lint is a required dependency ΓÇö the test fails if it is not installed.
+// golangci-lint is a required dependency ╬ô├ç├╢ the test fails if it is not installed.
 func TestGolangciLint(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping golangci-lint in short mode")
@@ -480,14 +494,14 @@ func TestGolangciLint(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 10. No secrets in .context/ templates ΓÇö no tokens, keys, passwords
+// 10. No secrets in .context/ templates ╬ô├ç├╢ no tokens, keys, passwords
 // ---------------------------------------------------------------------------
 
 // TestNoSecretsInTemplates scans template files for patterns that look like
 // secrets (API keys, tokens, private keys) per SECURITY.md requirements.
 func TestNoSecretsInTemplates(t *testing.T) {
 	root := projectRoot(t)
-	tplDir := filepath.Join(root, "internal", "assets")
+	tplDir := templateDir(t, root)
 
 	secretPatterns := []*regexp.Regexp{
 		regexp.MustCompile(`(?i)(api[_-]?key|secret[_-]?key|password|token|credential)\s*[:=]`),
@@ -520,14 +534,14 @@ func TestNoSecretsInTemplates(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 11. Required context files ΓÇö ctx init must create all required files
+// 11. Required context files ╬ô├ç├╢ ctx init must create all required files
 // ---------------------------------------------------------------------------
 
 // TestRequiredContextFilesInTemplate verifies that all required context file
 // templates exist in internal/assets/ so that ctx init can scaffold them.
 func TestRequiredContextFilesInTemplate(t *testing.T) {
 	root := projectRoot(t)
-	tplDir := filepath.Join(root, "internal", "assets")
+	tplDir := templateDir(t, root)
 
 	requiredFiles := []string{
 		"CONSTITUTION.md",
@@ -549,7 +563,7 @@ func TestRequiredContextFilesInTemplate(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 12. VERSION file ΓÇö must exist and contain a valid semver
+// 12. VERSION file ╬ô├ç├╢ must exist and contain a valid semver
 // ---------------------------------------------------------------------------
 
 // TestVersionFile checks the VERSION file exists and contains valid semver.
@@ -574,7 +588,7 @@ func TestVersionFile(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 13. go.mod ΓÇö module path and Go version check
+// 13. go.mod ╬ô├ç├╢ module path and Go version check
 // ---------------------------------------------------------------------------
 
 // TestGoMod verifies the module path and Go version in go.mod.
@@ -604,7 +618,7 @@ func TestGoMod(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 14. Makefile ΓÇö required targets exist
+// 14. Makefile ╬ô├ç├╢ required targets exist
 // ---------------------------------------------------------------------------
 
 // TestMakefileTargets verifies all expected build targets exist in the Makefile.
@@ -612,7 +626,7 @@ func TestMakefileTargets(t *testing.T) {
 	root := projectRoot(t)
 	makePath := filepath.Join(root, "Makefile")
 
-	data, err := os.ReadFile(makePath)
+	data, err := os.ReadFile(filepath.Clean(makePath)) //nolint:gosec // constructed from test constants
 	if err != nil {
 		t.Fatalf("cannot read Makefile: %v", err)
 	}
@@ -638,7 +652,7 @@ func TestMakefileTargets(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 15. CGO_ENABLED=0 ΓÇö build command must not use CGO
+// 15. CGO_ENABLED=0 ╬ô├ç├╢ build command must not use CGO
 // ---------------------------------------------------------------------------
 
 // TestBuildWithoutCGO verifies that Makefile build and test targets use
@@ -647,7 +661,7 @@ func TestBuildWithoutCGO(t *testing.T) {
 	root := projectRoot(t)
 	makePath := filepath.Join(root, "Makefile")
 
-	data, err := os.ReadFile(makePath)
+	data, err := os.ReadFile(filepath.Clean(makePath)) //nolint:gosec // constructed from test constants
 	if err != nil {
 		t.Fatalf("cannot read Makefile: %v", err)
 	}
@@ -683,7 +697,7 @@ func TestBuildWithoutCGO(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 16. .golangci.yml ΓÇö required linters are configured
+// 16. .golangci.yml ╬ô├ç├╢ required linters are configured
 // ---------------------------------------------------------------------------
 
 // TestGolangciLintConfig verifies that .golangci.yml enables the required
@@ -692,7 +706,7 @@ func TestGolangciLintConfig(t *testing.T) {
 	root := projectRoot(t)
 	lintPath := filepath.Join(root, ".golangci.yml")
 
-	data, err := os.ReadFile(lintPath)
+	data, err := os.ReadFile(filepath.Clean(lintPath)) //nolint:gosec // constructed from test constants
 	if err != nil {
 		t.Fatalf("cannot read .golangci.yml: %v", err)
 	}
@@ -716,7 +730,7 @@ func TestGolangciLintConfig(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 17. No network calls ΓÇö ctx must be local-only (no net/http imports in core)
+// 17. No network calls ╬ô├ç├╢ ctx must be local-only (no net/http imports in core)
 // ---------------------------------------------------------------------------
 
 // TestNoNetworkImportsInCore verifies that core packages do not import net or
@@ -756,7 +770,7 @@ func TestNoNetworkImportsInCore(t *testing.T) {
 						impPath := strings.Trim(imp.Path.Value, `"`)
 						if impPath == "net/http" || impPath == "net" {
 							pos := fset.Position(imp.Pos())
-							t.Errorf("%s:%d: %s imports %q ΓÇö ctx core must be local-only",
+							t.Errorf("%s:%d: %s imports %q ╬ô├ç├╢ ctx core must be local-only",
 								filepath.Base(pos.Filename), pos.Line, pkg, impPath)
 						}
 					}
@@ -767,7 +781,7 @@ func TestNoNetworkImportsInCore(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 18. Security ΓÇö .gitignore protects sensitive files
+// 18. Security ╬ô├ç├╢ .gitignore protects sensitive files
 // ---------------------------------------------------------------------------
 
 // TestGitignoreProtectsSensitiveFiles ensures .gitignore contains entries for
@@ -776,7 +790,7 @@ func TestGitignoreProtectsSensitiveFiles(t *testing.T) {
 	root := projectRoot(t)
 	giPath := filepath.Join(root, ".gitignore")
 
-	data, err := os.ReadFile(giPath)
+	data, err := os.ReadFile(filepath.Clean(giPath)) //nolint:gosec // constructed from test constants
 	if err != nil {
 		t.Fatalf("cannot read .gitignore: %v", err)
 	}
@@ -797,7 +811,7 @@ func TestGitignoreProtectsSensitiveFiles(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 19. Binary build ΓÇö ensure the project compiles without errors
+// 19. Binary build ╬ô├ç├╢ ensure the project compiles without errors
 // ---------------------------------------------------------------------------
 
 // TestProjectCompiles builds the entire project with CGO disabled to verify
@@ -819,7 +833,7 @@ func TestProjectCompiles(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// 20. File permissions ΓÇö config.PermSecret must be 0600
+// 20. File permissions ╬ô├ç├╢ config.PermSecret must be 0600
 // ---------------------------------------------------------------------------
 
 // TestPermissionConstants verifies that config.PermSecret and config.PermFile
@@ -828,7 +842,7 @@ func TestPermissionConstants(t *testing.T) {
 	root := projectRoot(t)
 	filePath := filepath.Join(root, "internal", "config", "file.go")
 
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filepath.Clean(filePath)) //nolint:gosec // constructed from test constants
 	if err != nil {
 		t.Fatalf("read file.go: %v", err)
 	}
