@@ -17,7 +17,9 @@ package compliance
 
 import (
 	"bufio"
+	"bytes"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"os"
@@ -392,6 +394,8 @@ func TestNoDirectFmtPrintInCobraHandlers(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 // TestGofmt verifies all Go files are properly formatted.
+// It normalizes CRLF to LF before comparison so that the test passes on
+// Windows where git may check out files with CRLF line endings.
 func TestGofmt(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping gofmt check in short mode")
@@ -399,15 +403,28 @@ func TestGofmt(t *testing.T) {
 
 	root := projectRoot(t)
 
-	cmd := exec.Command("gofmt", "-l", ".")
-	cmd.Dir = root
-	output, err := cmd.Output()
-	if err != nil {
-		t.Fatalf("gofmt failed: %v", err)
+	var unformatted []string
+	for _, f := range allGoFiles(t, root) {
+		data, err := os.ReadFile(filepath.Clean(f))
+		if err != nil {
+			t.Fatalf("read %s: %v", f, err)
+		}
+		// Normalize CRLF to LF so the check works on Windows.
+		normalized := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+		formatted, fmtErr := format.Source(normalized)
+		if fmtErr != nil {
+			// File doesn't parse; go vet will catch it.
+			continue
+		}
+		if !bytes.Equal(normalized, formatted) {
+			rel, _ := filepath.Rel(root, f)
+			unformatted = append(unformatted, rel)
+		}
 	}
 
-	if len(strings.TrimSpace(string(output))) > 0 {
-		t.Errorf("files need formatting:\n%s\nRun: go fmt ./...", string(output))
+	if len(unformatted) > 0 {
+		t.Errorf("files need formatting:\n\t%s\n\nRun: go fmt ./...",
+			strings.Join(unformatted, "\n\t"))
 	}
 }
 
