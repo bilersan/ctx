@@ -26,6 +26,10 @@ linters:
       # Test files use literal strings for clarity
       - linters: [goconst]
         path: "_test\\.go"
+      # Test files read known fixtures, not user input
+      - linters: [gosec]
+        path: "_test\\.go"
+        text: "G304"
 
 run:
   timeout: 5m

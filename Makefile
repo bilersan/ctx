@@ -3,7 +3,7 @@
 # Common targets for Go developers
 
 .PHONY: build test vet fmt lint lint-drift lint-docs clean all release build-all dogfood help \
-test-coverage smoke site site-serve site-setup audit check \
+test-coverage smoke site site-serve site-setup audit check compliance \
 journal journal-serve watch-session backup backup-global backup-all gpg-fix gpg-test
 
 # Default binary name and output
@@ -13,8 +13,13 @@ OUTPUT := $(BINARY)
 # Default target
 all: build
 
-## build: Build for current platform
-build:
+## compliance: Run compliance tests (standards enforcement)
+compliance:
+	@echo "==> Running compliance tests..."
+	@CGO_ENABLED=0 go test ./internal/compliance/...
+
+## build: Build for current platform (runs compliance first)
+build: compliance
 	CGO_ENABLED=0 go build -ldflags="-X github.com/ActiveMemory/ctx/internal/bootstrap.version=$$(cat VERSION | tr -d '[:space:]')" -o $(OUTPUT) ./cmd/ctx
 
 ## test: Run tests with coverage summary
