@@ -95,7 +95,7 @@ func runInit(cmd *cobra.Command, force, minimal, merge, ralph, noPluginEnable bo
 			continue
 		}
 
-		content, err := assets.Template(name)
+		content, err := assets.TemplateForCaller(name, caller)
 		if err != nil {
 			return fmt.Errorf("failed to read template %s: %w", name, err)
 		}
