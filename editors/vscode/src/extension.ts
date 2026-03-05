@@ -301,6 +301,9 @@ function runCtx(
         resolve({ stdout, stderr });
       }
     );
+    // Close stdin immediately so the child process never blocks waiting
+    // for interactive input (e.g. y/n prompts that --force/--merge skip).
+    child.stdin?.end();
     disposable = token?.onCancellationRequested(() => {
       child.kill();
     });
@@ -314,7 +317,7 @@ async function handleInit(
 ): Promise<CtxResult> {
   stream.progress("Initializing .context/ directory...");
   try {
-    const { stdout, stderr } = await runCtx(["init", "--no-color"], cwd, token);
+    const { stdout, stderr } = await runCtx(["init", "--force", "--merge", "--no-color"], cwd, token);
     const output = (stdout + stderr).trim();
     if (output) {
       stream.markdown("```\n" + output + "\n```");

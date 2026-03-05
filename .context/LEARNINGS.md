@@ -3,6 +3,7 @@
 <!-- INDEX:START -->
 | Date | Learning |
 |------|--------|
+| 2026-03-05 | CI checks can diverge from local: DCO requires --signoff, goconst differs Linux vs Windows, Test job lacks golangci-lint |
 | 2026-03-04 | CONSTITUTION hook compliance is non-negotiable — don't work around it |
 | 2026-03-04 | nolint:errcheck in tests normalizes unchecked errors for agents |
 | 2026-03-04 | golangci-lint v2 ignores inline nolint directives for some linters |
@@ -46,6 +47,19 @@
 | 2026-02-19 | Feature can be code-complete but invisible to users |
 | 2026-01-28 | IDE is already the UI |
 <!-- INDEX:END -->
+
+---
+
+## [2026-03-05] CI checks can diverge from local: DCO requires --signoff, goconst differs Linux vs Windows, Test job lacks golangci-lint
+
+**Context**: PR #26 passed all compliance tests locally (Windows) but failed all 3 CI checks (DCO, Lint, Test) on GitHub Actions (Linux).
+
+**Lesson**: Three specific divergences:
+1. **DCO**: GitHub uses `tim-actions/dco` to verify `Signed-off-by:` trailer — always use `git commit -s` for PRs to DCO-enforced repos.
+2. **goconst**: Linux golangci-lint flagged `"rust"` (3 occurrences) but Windows didn't — cross-platform lint results can differ. Fix: extract constants like `pythonEcosystem` pattern.
+3. **TestGolangciLint**: The CI Test job runs `go test ./...` but golangci-lint is only installed in the Lint job — tests requiring external tools should `t.Skip` (not `t.Fatal`) when the tool is missing.
+
+**Application**: Before pushing PRs, check `.github/workflows/ci.yml` for DCO requirements, run golangci-lint with `--timeout=5m` matching CI config, and ensure tests skip gracefully for optional tools.
 
 ---
 

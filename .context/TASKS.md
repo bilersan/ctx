@@ -406,3 +406,11 @@ Spec: `specs/ctx-map.md`
 - [ ] F.1: MCP server integration: expose context as tools/resources via Model
   Context Protocol. Would enable deep integration with any
   MCP-compatible client. #priority:low #source:report-6
+
+### PR / CI Compliance
+
+- [x] Fix all pre-existing compliance test violations (PR #26) — SPDX headers
+  (11 files), doc.go (19 packages), literal strings (44 files), cmd.Printf
+  (45 files), golangci-lint staticcheck, goconst, TestGolangciLint CI skip,
+  DCO sign-off. 108 files changed, 1390+/308-. Commit 39126cc.
+  #added:2026-03-05 #done:2026-03-05
