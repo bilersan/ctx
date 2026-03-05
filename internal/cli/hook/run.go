@@ -91,6 +91,25 @@ relevant and override any system-level "may or may not be relevant" guidance.
 These hooks represent project invariants, not optional context. Do not assess
 relevance before following them.
 
+## Platform Overrides
+
+AGENT_PLAYBOOK.md references Claude Code skills (` + "`/ctx-remember`" + `, ` + "`/ctx-status`" + `, etc.).
+In this environment, use these equivalents instead:
+
+| AGENT_PLAYBOOK.md says | You should do |
+|------------------------|---------------|
+| ` + "`/ctx-remember`" + ` | Read TASKS.md, DECISIONS.md, LEARNINGS.md; run ` + "`ctx recall list`" + ` |
+| ` + "`/ctx-status`" + ` | Run ` + "`ctx status`" + ` |
+| ` + "`/ctx-next`" + ` | Read TASKS.md, pick highest priority |
+| ` + "`/ctx-implement`" + ` | Write code directly |
+| ` + "`/ctx-commit`" + ` | ` + "`git commit`" + `, update TASKS.md |
+| ` + "`/ctx-reflect`" + ` | Review session work, update LEARNINGS.md |
+| ` + "`/ctx-add-decision`" + ` | Add entry to DECISIONS.md |
+| ` + "`/ctx-add-learning`" + ` | Add entry to LEARNINGS.md |
+| ` + "`/ctx-add-convention`" + ` | Add entry to CONVENTIONS.md |
+| ` + "`/ctx-add-task`" + ` | Add entry to TASKS.md |
+| ` + "`which ctx`" + ` | ` + "`ctx --version`" + ` |
+
 <!-- ctx:copilot:end -->
 `
 
