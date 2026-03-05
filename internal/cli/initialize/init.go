@@ -37,6 +37,7 @@ func Cmd() *cobra.Command {
 		merge          bool
 		ralph          bool
 		noPluginEnable bool
+		caller         string
 	)
 
 	cmd := &cobra.Command{
@@ -82,7 +83,7 @@ Examples:
   ctx init --force   # Overwrite existing files without prompting
   ctx init --merge   # Auto-merge ctx content into existing files`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runInit(cmd, force, minimal, merge, ralph, noPluginEnable)
+			return runInit(cmd, force, minimal, merge, ralph, noPluginEnable, caller)
 		},
 	}
 
@@ -106,6 +107,10 @@ Examples:
 	cmd.Flags().BoolVar(
 		&noPluginEnable, "no-plugin-enable", false,
 		"Skip auto-enabling the ctx plugin in global Claude Code settings",
+	)
+	cmd.Flags().StringVar(
+		&caller, "caller", "",
+		"Identify the calling tool (e.g. vscode) to tailor output",
 	)
 
 	return cmd

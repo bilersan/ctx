@@ -8,6 +8,14 @@ import * as https from "https";
 const PARTICIPANT_ID = "ctx.participant";
 const GITHUB_REPO = "ActiveMemory/ctx";
 
+// Debug log file — written directly to disk so we can always read it
+const DEBUG_LOG_PATH = path.join(os.homedir(), "ctx-vscode-debug.log");
+function dbg(msg: string) {
+  const ts = new Date().toISOString().slice(11, 23);
+  const line = `[ctx ${ts}] ${msg}\n`;
+  try { fs.appendFileSync(DEBUG_LOG_PATH, line); } catch {}
+}
+
 interface CtxResult extends vscode.ChatResult {
   metadata: {
     command: string;
@@ -160,8 +168,12 @@ function downloadFile(url: string, destPath: string): Promise<void> {
  * Check if a binary is executable by attempting to run it.
  */
 function isCtxExecutable(binPath: string): Promise<boolean> {
+  dbg(`isCtxExecutable: checking "${binPath}"`);
   return new Promise((resolve) => {
-    execFile(binPath, ["--version"], { timeout: 5000 }, (error) => {
+    const useShell = os.platform() === "win32";
+    dbg(`isCtxExecutable: shell=${useShell}, platform=${os.platform()}`);
+    execFile(binPath, ["--version"], { timeout: 5000, shell: useShell }, (error, stdout) => {
+      dbg(`isCtxExecutable: result for "${binPath}" => error=${error ? error.message : 'null'}, stdout=${(stdout || '').trim()}`);
       resolve(!error);
     });
   });
@@ -173,12 +185,16 @@ function isCtxExecutable(binPath: string): Promise<boolean> {
  * from GitHub releases into the extension's global storage directory.
  */
 async function ensureCtxAvailable(): Promise<void> {
+  dbg('ensureCtxAvailable: START');
   // 1. Check if user-configured or PATH-resolved ctx works
   const configuredPath = getCtxPath();
+  dbg(`ensureCtxAvailable: configuredPath="${configuredPath}"`);
   if (await isCtxExecutable(configuredPath)) {
     resolvedCtxPath = configuredPath;
+    dbg(`ensureCtxAvailable: FOUND at configured path`);
     return;
   }
+  dbg('ensureCtxAvailable: NOT found at configured path, checking global storage...');
 
   // 2. Check if we already downloaded it to global storage
   if (extensionCtx) {
@@ -245,20 +261,27 @@ let bootstrapPromise: Promise<void> | undefined;
 let bootstrapDone = false;
 
 async function bootstrap(): Promise<void> {
+  dbg(`bootstrap: START (done=${bootstrapDone}, hasPromise=${!!bootstrapPromise})`);
   if (bootstrapDone) {
+    dbg('bootstrap: already done, returning');
     return;
   }
   if (!bootstrapPromise) {
+    dbg('bootstrap: creating new promise');
     bootstrapPromise = ensureCtxAvailable().then(
       () => {
         bootstrapDone = true;
+        dbg('bootstrap: SUCCESS');
       },
       (err) => {
         // Reset so next attempt can retry
         bootstrapPromise = undefined;
+        dbg(`bootstrap: FAILED - ${err}`);
         throw err;
       }
     );
+  } else {
+    dbg('bootstrap: reusing existing promise');
   }
   return bootstrapPromise;
 }
@@ -269,8 +292,10 @@ function runCtx(
   token?: vscode.CancellationToken
 ): Promise<{ stdout: string; stderr: string }> {
   const ctxPath = getCtxPath();
+  dbg(`runCtx: START cmd="${ctxPath} ${args.join(' ')}" cwd=${cwd}`);
   return new Promise((resolve, reject) => {
     if (token?.isCancellationRequested) {
+      dbg('runCtx: already cancelled');
       reject(new Error("Cancelled"));
       return;
     }
@@ -279,11 +304,13 @@ function runCtx(
     // Use shell on Windows so execFile can resolve PATH executables
     // without requiring the .exe extension.
     const useShell = os.platform() === "win32";
+    dbg(`runCtx: execFile shell=${useShell}`);
     const child = execFile(
       ctxPath,
       args,
       { cwd, maxBuffer: 1024 * 1024, timeout: 30000, shell: useShell },
       (error, stdout, stderr) => {
+        dbg(`runCtx: CALLBACK error=${error ? error.message : 'null'} stdout=${(stdout||'').length}chars stderr=${(stderr||'').length}chars`);
         if (!disposed) {
           disposed = true;
           disposable?.dispose();
@@ -317,7 +344,7 @@ async function handleInit(
 ): Promise<CtxResult> {
   stream.progress("Initializing .context/ directory...");
   try {
-    const { stdout, stderr } = await runCtx(["init", "--force", "--merge", "--no-color"], cwd, token);
+    const { stdout, stderr } = await runCtx(["init", "--force", "--merge", "--no-color", "--caller", "vscode"], cwd, token);
     const output = (stdout + stderr).trim();
     if (output) {
       stream.markdown("```\n" + output + "\n```");
@@ -1003,18 +1030,23 @@ const handler: vscode.ChatRequestHandler = async (
   stream: vscode.ChatResponseStream,
   token: vscode.CancellationToken
 ): Promise<CtxResult> => {
+  dbg(`handler: ENTER command=${request.command || 'none'} prompt="${request.prompt}"`);
   const cwd = getWorkspaceRoot();
   if (!cwd) {
+    dbg('handler: no workspace root');
     stream.markdown(
       "**Error:** No workspace folder is open. Open a project folder first."
     );
     return { metadata: { command: request.command || "none" } };
   }
+  dbg(`handler: cwd=${cwd}`);
 
   // Auto-bootstrap: ensure ctx binary is available before any command
   try {
+    dbg('handler: calling bootstrap...');
     stream.progress("Checking ctx installation...");
     await bootstrap();
+    dbg('handler: bootstrap complete');
   } catch (err: unknown) {
     stream.markdown(
       `**Error:** ctx CLI not found and auto-install failed.\n\n` +
@@ -1064,22 +1096,39 @@ const handler: vscode.ChatRequestHandler = async (
 };
 
 export function activate(extensionContext: vscode.ExtensionContext) {
+  // Clear previous debug log
+  try { fs.writeFileSync(DEBUG_LOG_PATH, ''); } catch {}
+  dbg('activate: ENTER');
+  dbg(`activate: VS Code version=${vscode.version}`);
+  dbg(`activate: platform=${os.platform()}, arch=${os.arch()}`);
+  dbg(`activate: extensionPath=${extensionContext.extensionPath}`);
+  
   // Store extension context for auto-bootstrap binary downloads
   extensionCtx = extensionContext;
 
   // Kick off background bootstrap — don't block activation
-  bootstrap().catch(() => {
+  dbg('activate: starting background bootstrap');
+  bootstrap().catch((err) => {
+    dbg(`activate: background bootstrap failed: ${err}`);
     // Errors will surface when user invokes a command
   });
 
+  dbg('activate: creating chat participant...');
+  dbg(`activate: PARTICIPANT_ID="${PARTICIPANT_ID}"`);
+  dbg(`activate: typeof vscode.chat=${typeof vscode.chat}`);
+  dbg(`activate: typeof vscode.chat.createChatParticipant=${typeof vscode.chat?.createChatParticipant}`);
+  
   const participant = vscode.chat.createChatParticipant(
     PARTICIPANT_ID,
     handler
   );
+  dbg(`activate: participant created, id=${participant.id}`);
+  dbg(`activate: participant object keys=${Object.keys(participant).join(',')}`);
   participant.iconPath = vscode.Uri.joinPath(
     extensionContext.extensionUri,
     "icon.png"
   );
+  dbg('activate: icon set');
 
   participant.followupProvider = {
     provideFollowups(
@@ -1146,6 +1195,7 @@ export function activate(extensionContext: vscode.ExtensionContext) {
   };
 
   extensionContext.subscriptions.push(participant);
+  dbg('activate: participant pushed to subscriptions, activation COMPLETE');
 }
 
 export {

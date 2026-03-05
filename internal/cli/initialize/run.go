@@ -37,7 +37,7 @@ import (
 //
 // Returns:
 //   - error: Non-nil if directory creation or file operations fail
-func runInit(cmd *cobra.Command, force, minimal, merge, ralph, noPluginEnable bool) error {
+func runInit(cmd *cobra.Command, force, minimal, merge, ralph, noPluginEnable bool, caller string) error {
 	// Check if ctx is in PATH (required for hooks to work)
 	if err := checkCtxInPath(cmd); err != nil {
 		return err
@@ -152,25 +152,30 @@ func runInit(cmd *cobra.Command, force, minimal, merge, ralph, noPluginEnable bo
 		))
 	}
 
-	// Merge permissions into settings.local.json (no hook scaffolding)
-	cmd.Println("\nSetting up Claude Code permissions...")
-	if err := mergeSettingsPermissions(cmd); err != nil {
-		// Non-fatal: warn but continue
-		cmd.Println(fmt.Sprintf("  %s Permissions: %v", color.YellowString("⚠"), err))
-	}
+	// Skip Claude Code-specific steps when called from another tool.
+	skipClaudeCode := caller == "vscode"
 
-	// Auto-enable plugin globally unless suppressed
-	if !noPluginEnable {
-		if pluginErr := enablePluginGlobally(cmd); pluginErr != nil {
+	if !skipClaudeCode {
+		// Merge permissions into settings.local.json (no hook scaffolding)
+		cmd.Println("\nSetting up Claude Code permissions...")
+		if err := mergeSettingsPermissions(cmd); err != nil {
 			// Non-fatal: warn but continue
-			cmd.Println(fmt.Sprintf("  %s Plugin enablement: %v", color.YellowString("⚠"), pluginErr))
+			cmd.Println(fmt.Sprintf("  %s Permissions: %v", color.YellowString("⚠"), err))
 		}
-	}
 
-	// Handle CLAUDE.md creation/merge
-	if err := handleClaudeMd(cmd, force, merge); err != nil {
-		// Non-fatal: warn but continue
-		cmd.Println(fmt.Sprintf("  %s CLAUDE.md: %v", color.YellowString("⚠"), err))
+		// Auto-enable plugin globally unless suppressed
+		if !noPluginEnable {
+			if pluginErr := enablePluginGlobally(cmd); pluginErr != nil {
+				// Non-fatal: warn but continue
+				cmd.Println(fmt.Sprintf("  %s Plugin enablement: %v", color.YellowString("⚠"), pluginErr))
+			}
+		}
+
+		// Handle CLAUDE.md creation/merge
+		if err := handleClaudeMd(cmd, force, merge); err != nil {
+			// Non-fatal: warn but continue
+			cmd.Println(fmt.Sprintf("  %s CLAUDE.md: %v", color.YellowString("⚠"), err))
+		}
 	}
 
 	// Deploy Makefile.ctx and amend user Makefile
@@ -188,15 +193,18 @@ func runInit(cmd *cobra.Command, force, minimal, merge, ralph, noPluginEnable bo
 	cmd.Println("  1. Edit .context/TASKS.md to add your current tasks")
 	cmd.Println("  2. Run 'ctx status' to see context summary")
 	cmd.Println("  3. Run 'ctx agent' to get AI-ready context packet")
-	cmd.Println()
-	cmd.Println("Claude Code users: install the ctx plugin for hooks & skills:")
-	cmd.Println("  /plugin marketplace add ActiveMemory/ctx")
-	cmd.Println("  /plugin install ctx@activememory-ctx")
-	cmd.Println()
-	cmd.Println("Note: local plugin installs are not auto-enabled globally.")
-	cmd.Println("Run 'ctx init' again after installing the plugin to enable it,")
-	cmd.Println("or manually add to ~/.claude/settings.json:")
-	cmd.Println("  {\"enabledPlugins\": {\"ctx@activememory-ctx\": true}}")
+
+	if !skipClaudeCode {
+		cmd.Println()
+		cmd.Println("Claude Code users: install the ctx plugin for hooks & skills:")
+		cmd.Println("  /plugin marketplace add ActiveMemory/ctx")
+		cmd.Println("  /plugin install ctx@activememory-ctx")
+		cmd.Println()
+		cmd.Println("Note: local plugin installs are not auto-enabled globally.")
+		cmd.Println("Run 'ctx init' again after installing the plugin to enable it,")
+		cmd.Println("or manually add to ~/.claude/settings.json:")
+		cmd.Println("  {\"enabledPlugins\": {\"ctx@activememory-ctx\": true}}")
+	}
 
 	return nil
 }

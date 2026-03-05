@@ -34,7 +34,9 @@
     "copilot",
     "chat"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onChatParticipant:ctx.participant"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "chatParticipants": [
