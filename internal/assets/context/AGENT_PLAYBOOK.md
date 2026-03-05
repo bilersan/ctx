@@ -12,14 +12,14 @@ never come cleanly.
 ## Invoking ctx
 
 Always use `ctx` from PATH:
-```bash
+```
 ctx status        # ✓ correct
 ctx agent         # ✓ correct
 ./dist/ctx        # ✗ avoid hardcoded paths
 go run ./cmd/ctx  # ✗ avoid unless developing ctx itself
 ```
 
-Check with `which ctx` if unsure whether it's installed.
+If unsure whether it's installed, run `ctx --version` in a terminal.
 
 ## Context Readback
 
@@ -49,14 +49,14 @@ A session follows this arc:
 Not every session uses every step — a quick bugfix skips reflection, a
 research session skips committing — but the full flow is:
 
-| Step        | What Happens                                       | Skill / Command  |
-|-------------|----------------------------------------------------|------------------|
-| **Load**    | Recall context, present structured readback        | `/ctx-remember`  |
-| **Orient**  | Check context health, surface issues               | `/ctx-status`    |
-| **Pick**    | Choose what to work on                             | `/ctx-next`      |
-| **Work**    | Write code, fix bugs, research                     | `/ctx-implement` |
-| **Commit**  | Commit with context capture                        | `/ctx-commit`    |
-| **Reflect** | Surface persist-worthy items from this session     | `/ctx-reflect`   |
+| Step        | What Happens                                       | Command               |
+|-------------|----------------------------------------------------|----------------------|
+| **Load**    | Recall context, present structured readback        | `ctx recall list`    |
+| **Orient**  | Check context health, surface issues               | `ctx status`         |
+| **Pick**    | Choose what to work on                             | Read TASKS.md        |
+| **Work**    | Write code, fix bugs, research                     | —                    |
+| **Commit**  | Commit with context capture                        | `git commit`         |
+| **Reflect** | Surface persist-worthy items from this session     | Update context files |
 
 ### Context Health at Session Start
 
@@ -78,16 +78,16 @@ Users rarely invoke skills explicitly. Recognize natural language:
 
 | User Says | Action |
 |-----------|--------|
-| "Do you remember?" / "What were we working on?" | `/ctx-remember` |
-| "How's our context looking?" | `/ctx-status` |
-| "What should we work on?" | `/ctx-next` |
-| "Commit this" / "Ship it" | `/ctx-commit` |
-| "The rate limiter is done" / "We finished that" | `ctx complete` (match to TASKS.md) |
-| "What did we learn?" | `/ctx-reflect` |
-| "Save that as a decision" | `/ctx-add-decision` |
-| "That's worth remembering" / "Any gotchas?" | `/ctx-add-learning` |
-| "Record that convention" | `/ctx-add-convention` |
-| "Add a task for that" | `/ctx-add-task` |
+| "Do you remember?" / "What were we working on?" | Read TASKS.md, DECISIONS.md, LEARNINGS.md; run `ctx recall list` |
+| "How's our context looking?" | Run `ctx status` |
+| "What should we work on?" | Read TASKS.md, pick highest priority |
+| "Commit this" / "Ship it" | `git commit`, update TASKS.md |
+| "The rate limiter is done" / "We finished that" | Mark done in TASKS.md |
+| "What did we learn?" | Review session work, offer to update LEARNINGS.md |
+| "Save that as a decision" | Add entry to DECISIONS.md |
+| "That's worth remembering" / "Any gotchas?" | Add entry to LEARNINGS.md |
+| "Record that convention" | Add entry to CONVENTIONS.md |
+| "Add a task for that" | Add entry to TASKS.md |
 | "Let's wrap up" | Reflect → persist outstanding items → present together |
 
 ## Proactive Persistence
