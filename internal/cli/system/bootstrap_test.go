@@ -217,6 +217,7 @@ func writeTestJSON(t *testing.T, path string, v any) {
 func TestPluginWarning_EmptyWhenNotInstalled(t *testing.T) {
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 
 	if w := pluginWarning(); w != "" {
 		t.Errorf("expected empty warning, got: %s", w)
@@ -226,6 +227,7 @@ func TestPluginWarning_EmptyWhenNotInstalled(t *testing.T) {
 func TestPluginWarning_EmptyWhenEnabledGlobally(t *testing.T) {
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 
 	// Create installed_plugins.json.
 	writeTestJSON(t,
@@ -258,6 +260,7 @@ func TestPluginWarning_EmptyWhenEnabledGlobally(t *testing.T) {
 func TestPluginWarning_WarnsWhenInstalledButNotEnabled(t *testing.T) {
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 
 	// Create installed_plugins.json.
 	writeTestJSON(t,

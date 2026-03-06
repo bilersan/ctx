@@ -194,6 +194,7 @@ func TestRunBackup_NoSMB(t *testing.T) {
 	// Set up fake home.
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 	t.Setenv(config.EnvBackupSMBURL, "")
 	t.Setenv(config.EnvBackupSMBSubdir, "")
 

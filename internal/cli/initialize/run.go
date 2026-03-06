@@ -349,7 +349,7 @@ func ensureGitignoreEntries(cmd *cobra.Command) error {
 //   - contextDir: The .context/ directory (entry is relative to this)
 //   - filename: The filename to add (e.g., ".ctx.key")
 func addToGitignore(contextDir, filename string) error {
-	entry := filepath.Join(contextDir, filename)
+	entry := filepath.ToSlash(filepath.Join(contextDir, filename))
 	gitignorePath := ".gitignore"
 
 	// Read existing .gitignore

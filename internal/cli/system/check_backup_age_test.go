@@ -117,6 +117,7 @@ func TestCheckBackupAge_StaleMarkerEmitsWarning(t *testing.T) {
 	// Create a stale marker at the expected location
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 	localStateDir := filepath.Join(home, ".local", "state")
 	if err := os.MkdirAll(localStateDir, 0o750); err != nil {
 		t.Fatal(err)
@@ -152,6 +153,7 @@ func TestCheckBackupAge_FreshMarkerSilent(t *testing.T) {
 
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 	localStateDir := filepath.Join(home, ".local", "state")
 	if err := os.MkdirAll(localStateDir, 0o750); err != nil {
 		t.Fatal(err)
@@ -180,6 +182,7 @@ func TestCheckBackupAge_MissingMarkerWarns(t *testing.T) {
 	// Use a home dir with no marker file
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 	t.Setenv("CTX_BACKUP_SMB_URL", "")
 
 	cmd := newTestCmd()

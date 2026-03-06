@@ -1,0 +1,86 @@
+name: CI (Windows)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Prevent concurrent runs on the same VM
+concurrency:
+  group: wintest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-go:
+    name: Go Tests (Windows)
+    runs-on: [self-hosted, wintest]
+    # Only run on commits from this repo (not forks) for self-hosted runner security
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+
+      - name: Build
+        run: go build ./...
+        env:
+          CGO_ENABLED: '0'
+
+      - name: Test
+        run: go test -v ./...
+        env:
+          CGO_ENABLED: '0'
+          CTX_SKIP_PATH_CHECK: '1'
+
+      - name: Vet
+        run: go vet ./...
+        env:
+          CGO_ENABLED: '0'
+
+  test-vscode:
+    name: VS Code Extension Tests (Windows)
+    runs-on: [self-hosted, wintest]
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: editors/vscode
+
+      - name: Run tests
+        run: npm test
+        working-directory: editors/vscode
+
+  smoke:
+    name: Smoke Tests (Windows)
+    runs-on: [self-hosted, wintest]
+    needs: [test-go]
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+
+      - name: Run smoke tests
+        run: powershell -ExecutionPolicy Bypass -File hack/smoke-windows.ps1
+        env:
+          CGO_ENABLED: '0'

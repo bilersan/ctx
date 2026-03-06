@@ -249,6 +249,7 @@ func TestExtractOversizeTokens(t *testing.T) {
 func TestCheckpointWithTokenLine(t *testing.T) {
 	tmpDir := t.TempDir()
 	t.Setenv("HOME", tmpDir)
+	t.Setenv("USERPROFILE", tmpDir)
 
 	workDir := t.TempDir()
 	origDir, _ := os.Getwd()
@@ -294,6 +295,7 @@ func TestCheckpointWithTokenLine(t *testing.T) {
 func TestWindowWarning_Over80(t *testing.T) {
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
 
 	workDir := t.TempDir()
 	origDir, _ := os.Getwd()
@@ -332,6 +334,7 @@ func TestWindowWarning_Over80(t *testing.T) {
 func TestWindowWarning_Under80_NoCheckpoint(t *testing.T) {
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
 
 	workDir := t.TempDir()
 	origDir, _ := os.Getwd()
@@ -367,6 +370,7 @@ func TestWindowWarning_Under80_NoCheckpoint(t *testing.T) {
 func TestWindowWarning_HighUsage(t *testing.T) {
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
 
 	workDir := t.TempDir()
 	origDir, _ := os.Getwd()
@@ -550,6 +554,7 @@ func createTempStdin(t *testing.T, content string) *os.File {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() { _ = f.Close() })
 	if _, err := f.WriteString(content); err != nil {
 		t.Fatal(err)
 	}

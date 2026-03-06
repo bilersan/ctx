@@ -232,11 +232,15 @@ func TestGenerateIndex(t *testing.T) {
 }
 
 func TestInjectSourceLink_WithFrontmatter(t *testing.T) {
+	// Use a real temp path so filepath.Abs() is a no-op on all platforms.
+	srcPath := filepath.Join(t.TempDir(), ".context", "journal", "test.md")
+	wantAbs := filepath.ToSlash(srcPath)
+
 	content := "---\ntitle: Test\n---\n\n# Heading\n"
-	result := injectSourceLink(content, "/home/user/.context/journal/test.md")
+	result := injectSourceLink(content, srcPath)
 
 	// Should have file:// link
-	if !strings.Contains(result, "[View source](file:///home/user/.context/journal/test.md)") {
+	if !strings.Contains(result, "[View source](file://"+wantAbs+")") {
 		t.Errorf("missing file:// link:\n%s", result)
 	}
 	// Should have copyable path with copy button
@@ -250,11 +254,15 @@ func TestInjectSourceLink_WithFrontmatter(t *testing.T) {
 }
 
 func TestInjectSourceLink_NoFrontmatter(t *testing.T) {
+	// Use a real temp path so filepath.Abs() is a no-op on all platforms.
+	srcPath := filepath.Join(t.TempDir(), "file.md")
+	wantAbs := filepath.ToSlash(srcPath)
+
 	content := "# Heading\n\nSome text.\n"
-	result := injectSourceLink(content, "/path/to/file.md")
+	result := injectSourceLink(content, srcPath)
 
 	// Link should be at the top
-	if !strings.HasPrefix(result, "*[View source](file:///path/to/file.md)") {
+	if !strings.HasPrefix(result, "*[View source](file://"+wantAbs+")") {
 		t.Errorf("source link not at top:\n%s", result)
 	}
 	if !strings.Contains(result, ".context/journal/file.md") {

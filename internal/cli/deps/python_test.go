@@ -38,9 +38,8 @@ func TestPythonBuilder_Requirements(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
-
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -85,9 +84,8 @@ func TestPythonBuilder_Pyproject(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
-
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -139,9 +137,8 @@ func TestPythonBuilder_PyprojectInlineArray(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
-
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -174,9 +171,8 @@ func TestPythonBuilder_DetectPyproject(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
-
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}

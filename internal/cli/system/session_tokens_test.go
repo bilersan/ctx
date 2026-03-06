@@ -19,6 +19,7 @@ func TestFindJSONLPath_Found(t *testing.T) {
 	setupStateDir(t)
 	tmpDir := t.TempDir()
 	t.Setenv("HOME", tmpDir)
+	t.Setenv("USERPROFILE", tmpDir)
 
 	// Create a fake JSONL file in the expected location
 	sessionID := "test-session-abc123"
@@ -44,6 +45,7 @@ func TestFindJSONLPath_NotFound(t *testing.T) {
 	setupStateDir(t)
 	tmpDir := t.TempDir()
 	t.Setenv("HOME", tmpDir)
+	t.Setenv("USERPROFILE", tmpDir)
 
 	got, findErr := findJSONLPath("nonexistent-session")
 	if findErr != nil {
@@ -58,6 +60,7 @@ func TestFindJSONLPath_Cached(t *testing.T) {
 	ctxDir := setupStateDir(t)
 	tmpDir := t.TempDir()
 	t.Setenv("HOME", tmpDir)
+	t.Setenv("USERPROFILE", tmpDir)
 
 	sessionID := "test-cached-session"
 	projectDir := filepath.Join(tmpDir, ".claude", "projects", "testproj")
@@ -279,6 +282,7 @@ func TestEffectiveContextWindow(t *testing.T) {
 	// All Claude models return 200k by default (no [1m] in settings)
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
 
 	got := effectiveContextWindow("claude-opus-4-6")
 	if got != rc.DefaultContextWindow {
@@ -302,6 +306,7 @@ func TestClaudeSettingsHas1M(t *testing.T) {
 	t.Run("no_settings_file", func(t *testing.T) {
 		homeDir := t.TempDir()
 		t.Setenv("HOME", homeDir)
+		t.Setenv("USERPROFILE", homeDir)
 		if claudeSettingsHas1M() {
 			t.Error("expected false when settings.json does not exist")
 		}
@@ -310,6 +315,7 @@ func TestClaudeSettingsHas1M(t *testing.T) {
 	t.Run("no_model_key", func(t *testing.T) {
 		homeDir := t.TempDir()
 		t.Setenv("HOME", homeDir)
+		t.Setenv("USERPROFILE", homeDir)
 		_ = os.MkdirAll(filepath.Join(homeDir, ".claude"), 0o750)
 		_ = os.WriteFile(filepath.Join(homeDir, ".claude", "settings.json"),
 			[]byte(`{"cleanupPeriodDays": 30}`), 0o600)
@@ -321,6 +327,7 @@ func TestClaudeSettingsHas1M(t *testing.T) {
 	t.Run("model_without_1m", func(t *testing.T) {
 		homeDir := t.TempDir()
 		t.Setenv("HOME", homeDir)
+		t.Setenv("USERPROFILE", homeDir)
 		_ = os.MkdirAll(filepath.Join(homeDir, ".claude"), 0o750)
 		_ = os.WriteFile(filepath.Join(homeDir, ".claude", "settings.json"),
 			[]byte(`{"model": "opus"}`), 0o600)
@@ -332,6 +339,7 @@ func TestClaudeSettingsHas1M(t *testing.T) {
 	t.Run("model_with_1m", func(t *testing.T) {
 		homeDir := t.TempDir()
 		t.Setenv("HOME", homeDir)
+		t.Setenv("USERPROFILE", homeDir)
 		_ = os.MkdirAll(filepath.Join(homeDir, ".claude"), 0o750)
 		_ = os.WriteFile(filepath.Join(homeDir, ".claude", "settings.json"),
 			[]byte(`{"model": "opus[1m]"}`), 0o600)
@@ -343,6 +351,7 @@ func TestClaudeSettingsHas1M(t *testing.T) {
 	t.Run("sonnet_with_1m", func(t *testing.T) {
 		homeDir := t.TempDir()
 		t.Setenv("HOME", homeDir)
+		t.Setenv("USERPROFILE", homeDir)
 		_ = os.MkdirAll(filepath.Join(homeDir, ".claude"), 0o750)
 		_ = os.WriteFile(filepath.Join(homeDir, ".claude", "settings.json"),
 			[]byte(`{"model": "sonnet[1m]"}`), 0o600)
@@ -356,6 +365,7 @@ func TestEffectiveContextWindow_1MAutoDetect(t *testing.T) {
 	rc.Reset()
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
 	_ = os.MkdirAll(filepath.Join(homeDir, ".claude"), 0o750)
 	_ = os.WriteFile(filepath.Join(homeDir, ".claude", "settings.json"),
 		[]byte(`{"model": "opus[1m]"}`), 0o600)

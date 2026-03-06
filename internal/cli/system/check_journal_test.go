@@ -45,6 +45,7 @@ func TestCheckJournal_DailyThrottle(t *testing.T) {
 	_ = os.MkdirAll(resolvedJournalDir(), 0o750)
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 	_ = os.MkdirAll(filepath.Join(tmpHome, ".claude", "projects"), 0o750)
 
 	// Create the throttle marker (touched today)
@@ -64,6 +65,7 @@ func TestCheckJournal_DailyThrottle(t *testing.T) {
 func TestCheckJournal_Unenriched(t *testing.T) {
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 
 	workDir := t.TempDir()
 	origDir, _ := os.Getwd()
@@ -99,6 +101,7 @@ func TestCheckJournal_Unenriched(t *testing.T) {
 func TestCheckJournal_BothStages(t *testing.T) {
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 
 	workDir := t.TempDir()
 	origDir, _ := os.Getwd()

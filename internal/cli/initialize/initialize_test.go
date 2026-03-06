@@ -33,6 +33,7 @@ func helper(t *testing.T) (string, func()) {
 		t.Fatalf("failed to chdir: %v", err)
 	}
 	t.Setenv("HOME", tmpDir)
+	t.Setenv("USERPROFILE", tmpDir)
 	return tmpDir, func() {
 		_ = os.Chdir(origDir)
 		_ = os.RemoveAll(tmpDir)

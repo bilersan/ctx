@@ -24,6 +24,7 @@ func withFakeHome(t *testing.T) string {
 	tmpHome := t.TempDir()
 	orig := os.Getenv("HOME")
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 	t.Cleanup(func() { _ = os.Setenv("HOME", orig) })
 	return tmpHome
 }

@@ -80,10 +80,10 @@ func TestDetectBuilder(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	// Empty dir — no builder detected.
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -105,9 +105,9 @@ func TestDetectBuilder_Node(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -125,9 +125,9 @@ func TestDetectBuilder_Python(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -145,9 +145,9 @@ func TestDetectBuilder_Rust(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -165,9 +165,9 @@ func TestDetectBuilder_PriorityOrder(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -230,9 +230,9 @@ func TestRunDeps_GoProject(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -287,9 +287,9 @@ func TestRunDeps_NoProject(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -314,9 +314,9 @@ func TestRunDeps_TableFormat(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
@@ -366,9 +366,9 @@ func TestRunDeps_JSONFormat(t *testing.T) {
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
-	t.Cleanup(func() { _ = os.Chdir(orig) })
 
 	tmp := t.TempDir()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if chdirErr := os.Chdir(tmp); chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
