@@ -190,6 +190,30 @@ any P0.9 task.
 - [-] P0.9.3: Investigate proactive content suggestions — moved to Future
   #added:2026-02-24-185754
 
+### Phase CP: Copilot Chat Session Parser for Recall
+
+- [x] CP.1: Implement CopilotParser — JSONL parser for VS Code Copilot Chat sessions
+  supporting kind=0 snapshots and kind=1/2 patches, workspace.json resolution,
+  tool invocation parsing, and multi-response reconstruction.
+  Files: copilot.go, copilot_raw.go in internal/recall/parser/
+  #added:2026-03-05 #done:2026-03-05
+
+- [x] CP.2: Register CopilotParser in parser registry and add CopilotSessionDirs()
+  to session discovery in query.go — scans Code and Code Insiders workspace storage.
+  #added:2026-03-05 #done:2026-03-05
+
+- [x] CP.3: Add ToolCopilot constant to internal/config/file.go
+  #added:2026-03-05 #done:2026-03-05
+
+- [x] CP.4: Fix Windows path validation — case-insensitive comparison
+  with strings.EqualFold for validation/path.go
+  #added:2026-03-05 #done:2026-03-05
+
+- [x] CP.5: Add --caller vscode flag to ctx init — gates Claude-specific
+  steps when called from VS Code extension. Caller-specific template
+  overrides via internal/assets/overrides/<caller>/ directory.
+  #added:2026-03-05 #done:2026-03-05
+
 ### Phase 0.8: RSS/Atom Feed Generation (`ctx site feed`)
 
 Spec: `specs/rss-feed.md`. Read the spec before starting any P0.8 task.

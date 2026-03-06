@@ -3,6 +3,8 @@
 <!-- INDEX:START -->
 | Date | Decision |
 |------|--------|
+| 2026-03-06 | Copilot Chat session parser: auto-detect via JSONL content, not --caller flag |
+| 2026-03-06 | Caller-specific template overrides via embedded overrides/<caller>/ directory |
 | 2026-03-04 | Interface-based GraphBuilder for multi-ecosystem ctx deps |
 | 2026-03-02 | Billing threshold piggybacks on check-context-size, not heartbeat |
 | 2026-03-02 | Replace auto-migration with stderr warning for legacy keys |
@@ -22,6 +24,34 @@
 | 2026-02-26 | Security and permissions (consolidated) |
 | 2026-02-27 | Webhook and notification design (consolidated) |
 <!-- INDEX:END -->
+
+## [2026-03-06] Copilot Chat session parser: auto-detect via JSONL content, not --caller flag
+
+**Status**: Accepted
+
+**Context**: Question arose whether CopilotParser should use --caller flag for detection. But --caller is a write-time flag (which templates to generate at init), while Tool() detection is read-time (which parser to use for session files). ctx doesn't write session files — Copilot/Claude Code write them, ctx just reads them.
+
+**Decision**: CopilotParser uses Matches() with path pattern + JSONL kind=0 content sniffing. --caller flag remains solely for init-time template selection.
+
+**Rationale**: Separation of concerns — write direction (init templates) and read direction (session parsing) are independent axes. A project initialized with --caller=vscode might still have Claude Code sessions, and vice versa.
+
+**Consequences**: CopilotParser auto-discovers sessions from both Code and Code Insiders workspace storage directories without configuration.
+
+---
+
+## [2026-03-06] Caller-specific template overrides via embedded overrides/<caller>/ directory
+
+**Status**: Accepted
+
+**Context**: VS Code extension calls ctx init --caller vscode, but AGENT_PLAYBOOK.md referenced Claude Code-specific concepts (compact, JSONL) irrelevant in VS Code.
+
+**Decision**: File-level overrides in internal/assets/overrides/<caller>/<filename>.md. TemplateForCaller() checks for override first, falls back to default template.
+
+**Rationale**: Clean separation — default templates work for Claude Code, overrides per caller replace entire files. No conditional logic inside templates.
+
+**Consequences**: Adding a new caller-specific template is just dropping a file in overrides/<caller>/.
+
+---
 
 ## [2026-03-04-105238] Interface-based GraphBuilder for multi-ecosystem ctx deps
 

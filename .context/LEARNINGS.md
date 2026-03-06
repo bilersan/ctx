@@ -3,6 +3,8 @@
 <!-- INDEX:START -->
 | Date | Learning |
 |------|--------|
+| 2026-03-06 | Copilot Chat JSONL uses kind=0 snapshots and kind=1/2 patches for incremental updates |
+| 2026-03-06 | VS Code --install-extension fails with EPERM when editor is running and extension is active |
 | 2026-03-05 | CI checks can diverge from local: DCO requires --signoff, goconst differs Linux vs Windows, Test job lacks golangci-lint |
 | 2026-03-04 | CONSTITUTION hook compliance is non-negotiable — don't work around it |
 | 2026-03-04 | nolint:errcheck in tests normalizes unchecked errors for agents |
@@ -47,6 +49,22 @@
 | 2026-02-19 | Feature can be code-complete but invisible to users |
 | 2026-01-28 | IDE is already the UI |
 <!-- INDEX:END -->
+
+---
+
+## [2026-03-06] Copilot Chat JSONL uses kind=0 snapshots and kind=1/2 patches for incremental updates
+
+**Context**: Building CopilotParser for ctx recall required reverse-engineering the VS Code Copilot Chat JSONL format.
+
+**Lesson**: Copilot Chat sessions are stored as JSONL in `%APPDATA%/Code[ - Insiders]/User/workspaceStorage/<hash>/chatSessions/`. Format: kind=0 is a full JSON snapshot of the session; kind=1 is a scalar patch (K=JSON path, V=new value); kind=2 is an array/object patch (K=JSON path, V=new element). To reconstruct current state: start from last kind=0, apply subsequent kind=1/2 patches in order. Workspace folder is resolved via `workspace.json` in the parent directory (maps hash to `file://` URI).
+
+---
+
+## [2026-03-06] VS Code --install-extension fails with EPERM when editor is running and extension is active
+
+**Context**: Installing VSIX to Code Insiders while this session was running in it.
+
+**Lesson**: `code-insiders --install-extension .vsix --force` fails with EPERM rename error when the extension files are locked by the running process. Code stable installs fine if the extension isn't active there. Workaround: restart the editor first, or install to the non-running editor.
 
 ---
 
