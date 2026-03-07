@@ -31,6 +31,18 @@ import {
   handlePad,
   handleNotify,
   handleSystem,
+  handleChanges,
+  handleConfig,
+  handleDoctor,
+  handleGuide,
+  handleWhy,
+  handleMemory,
+  handlePrompt,
+  handleDecisions,
+  handleLearnings,
+  handleDeps,
+  handleJournal,
+  handleReindex,
 } from "./extension";
 
 // Helper: create a fake CancellationToken
@@ -697,6 +709,481 @@ describe("handleSystem", () => {
     const stream = fakeStream();
     const token = fakeToken();
     await handleSystem(stream as never, "resources", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleChanges", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs changes without --since when no prompt", async () => {
+    mockRunCtxSuccess("3 files changed");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleChanges(stream as never, "", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["changes", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("passes --since when prompt provided", async () => {
+    mockRunCtxSuccess("2 files changed");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleChanges(stream as never, "24h", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["changes", "--no-color", "--since", "24h"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("shows 'No changes detected.' when output is empty", async () => {
+    mockRunCtxSuccess("");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleChanges(stream as never, "", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith("No changes detected.");
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("git error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleChanges(stream as never, "", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleConfig", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("shows usage when no subcommand given", async () => {
+    const stream = fakeStream();
+    const token = fakeToken();
+    const result = await handleConfig(stream as never, "", "/test", token);
+    expect(result.metadata.command).toBe("config");
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Usage"));
+  });
+
+  it("runs status subcommand", async () => {
+    mockRunCtxSuccess("Profile: base");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleConfig(stream as never, "status", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["config", "status", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("runs switch subcommand with profile", async () => {
+    mockRunCtxSuccess("Switched to dev");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleConfig(stream as never, "switch dev", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["config", "switch", "dev", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("config error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleConfig(stream as never, "status", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleDoctor", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs doctor command", async () => {
+    mockRunCtxSuccess("All checks passed");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDoctor(stream as never, "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["doctor", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+    expect(stream.progress).toHaveBeenCalledWith("Running health checks...");
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("doctor error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDoctor(stream as never, "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleGuide", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs guide without flags when no prompt", async () => {
+    mockRunCtxSuccess("ctx cheat sheet");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleGuide(stream as never, "", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["guide", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("passes --skills flag", async () => {
+    mockRunCtxSuccess("skills list");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleGuide(stream as never, "skills", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["guide", "--no-color", "--skills"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("passes --commands flag", async () => {
+    mockRunCtxSuccess("commands list");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleGuide(stream as never, "commands", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["guide", "--no-color", "--commands"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("guide error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleGuide(stream as never, "", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleWhy", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs why with document name", async () => {
+    mockRunCtxSuccess("The ctx Manifesto");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleWhy(stream as never, "manifesto", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["why", "manifesto", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("runs why without document for interactive menu", async () => {
+    mockRunCtxSuccess("1. manifesto\n2. about");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleWhy(stream as never, "", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["why", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("doc not found");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleWhy(stream as never, "manifesto", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleMemory", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("shows usage when no subcommand given", async () => {
+    const stream = fakeStream();
+    const token = fakeToken();
+    const result = await handleMemory(stream as never, "", "/test", token);
+    expect(result.metadata.command).toBe("memory");
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Usage"));
+  });
+
+  it("runs sync subcommand", async () => {
+    mockRunCtxSuccess("Memory synced");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleMemory(stream as never, "sync", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["memory", "sync", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("runs status subcommand", async () => {
+    mockRunCtxSuccess("Status: in sync");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleMemory(stream as never, "status", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["memory", "status", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("memory error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleMemory(stream as never, "sync", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handlePrompt", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("lists prompts when no subcommand given", async () => {
+    mockRunCtxSuccess("review\nrefactor");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handlePrompt(stream as never, "", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["prompt", "list", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("shows a prompt by name", async () => {
+    mockRunCtxSuccess("Review the code...");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handlePrompt(stream as never, "show review", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["prompt", "show", "review", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("shows usage when 'rm' has no name", async () => {
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handlePrompt(stream as never, "rm", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Usage"));
+  });
+
+  it("shows 'No prompt templates found.' when empty", async () => {
+    mockRunCtxSuccess("");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handlePrompt(stream as never, "", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith("No prompt templates found.");
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("prompt error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handlePrompt(stream as never, "show missing", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleDecisions", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs decisions command", async () => {
+    mockRunCtxSuccess("1. Use Redis");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDecisions(stream as never, "", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["decisions", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("passes subcommand arguments", async () => {
+    mockRunCtxSuccess("Decision listed");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDecisions(stream as never, "list", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["decisions", "list", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("decisions error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDecisions(stream as never, "", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleLearnings", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs learnings command", async () => {
+    mockRunCtxSuccess("1. Go embed trick");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleLearnings(stream as never, "", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["learnings", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("learnings error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleLearnings(stream as never, "", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleDeps", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs deps command", async () => {
+    mockRunCtxSuccess("internal/mcp -> internal/config");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDeps(stream as never, "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["deps", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+    expect(stream.progress).toHaveBeenCalledWith("Analyzing dependencies...");
+  });
+
+  it("shows fallback when no output", async () => {
+    mockRunCtxSuccess("");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDeps(stream as never, "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith("No dependency information available.");
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("deps error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleDeps(stream as never, "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleJournal", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs journal command", async () => {
+    mockRunCtxSuccess("Session analysis");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleJournal(stream as never, "", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["journal", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("passes subcommand arguments", async () => {
+    mockRunCtxSuccess("Analysis complete");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleJournal(stream as never, "synthesize", "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["journal", "synthesize", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("journal error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleJournal(stream as never, "", "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
+  });
+});
+
+describe("handleReindex", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("runs reindex command", async () => {
+    mockRunCtxSuccess("Indices updated");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleReindex(stream as never, "/test", token);
+    expect(cp.execFile).toHaveBeenCalledWith(
+      "ctx",
+      ["reindex", "--no-color"],
+      expect.anything(),
+      expect.any(Function)
+    );
+    expect(stream.progress).toHaveBeenCalledWith("Regenerating indices...");
+  });
+
+  it("shows fallback when no output", async () => {
+    mockRunCtxSuccess("");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleReindex(stream as never, "/test", token);
+    expect(stream.markdown).toHaveBeenCalledWith("Indices regenerated.");
+  });
+
+  it("handles errors gracefully", async () => {
+    mockRunCtxError("reindex error");
+    const stream = fakeStream();
+    const token = fakeToken();
+    await handleReindex(stream as never, "/test", token);
     expect(stream.markdown).toHaveBeenCalledWith(expect.stringContaining("Error"));
   });
 });
