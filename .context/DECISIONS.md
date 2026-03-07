@@ -3,28 +3,40 @@
 <!-- INDEX:START -->
 | Date | Decision |
 |------|--------|
-| 2026-03-07 | Windows test compat: fix production code (filepath separators) and tests (7 categories), no platform-specific build tags |
-| 2026-03-06 | Copilot Chat session parser: auto-detect via JSONL content, not --caller flag |
-| 2026-03-06 | Caller-specific template overrides via embedded overrides/<caller>/ directory |
-| 2026-03-04 | Interface-based GraphBuilder for multi-ecosystem ctx deps |
-| 2026-03-02 | Billing threshold piggybacks on check-context-size, not heartbeat |
-| 2026-03-02 | Replace auto-migration with stderr warning for legacy keys |
-| 2026-03-02 | Consolidate all session state to .context/state/ |
-| 2026-03-01 | PersistentPreRunE init guard with three-level exemption |
-| 2026-03-01 | Global encryption key at ~/.ctx/.ctx.key |
-| 2026-03-01 | Heartbeat token telemetry: conditional fields, not always-present |
-| 2026-03-01 | Hook log rotation: size-based with one previous generation, matching eventlog pattern |
-| 2026-03-01 | Promote 6 private skills to bundled plugin skills; keep 7 project-local |
-| 2026-02-27 | Context window detection: JSONL-first fallback order |
-| 2026-02-27 | Context injection architecture v2 (consolidated) |
-| 2026-02-26 | .context/state/ directory for project-scoped runtime state |
-| 2026-02-26 | Hook and notification design (consolidated) |
-| 2026-02-26 | ctx init and CLAUDE.md handling (consolidated) |
-| 2026-02-26 | Task and knowledge management (consolidated) |
-| 2026-02-26 | Agent autonomy and separation of concerns (consolidated) |
-| 2026-02-26 | Security and permissions (consolidated) |
-| 2026-02-27 | Webhook and notification design (consolidated) |
+| 2026-03-07 | VSIX handlers use prompt parameter for CLI flag parsing |
+| 2026-03-04 | Interface-based GraphBuilder for multi-ecosystem ctx deps |
+| 2026-03-02 | Billing threshold piggybacks on check-context-size, not heartbeat |
+| 2026-03-02 | Replace auto-migration with stderr warning for legacy keys |
+| 2026-03-02 | Consolidate all session state to .context/state/ |
+| 2026-03-01 | PersistentPreRunE init guard with three-level exemption |
+| 2026-03-01 | Global encryption key at ~/.ctx/.ctx.key |
+| 2026-03-01 | Heartbeat token telemetry: conditional fields, not always-present |
+| 2026-03-01 | Hook log rotation: size-based with one previous generation, matching eventlog pattern |
+| 2026-03-01 | Promote 6 private skills to bundled plugin skills; keep 7 project-local |
+| 2026-02-27 | Context window detection: JSONL-first fallback order |
+| 2026-02-27 | Context injection architecture v2 (consolidated) |
+| 2026-02-26 | .context/state/ directory for project-scoped runtime state |
+| 2026-02-26 | Hook and notification design (consolidated) |
+| 2026-02-26 | ctx init and CLAUDE.md handling (consolidated) |
+| 2026-02-26 | Task and knowledge management (consolidated) |
+| 2026-02-26 | Agent autonomy and separation of concerns (consolidated) |
+| 2026-02-26 | Security and permissions (consolidated) |
+| 2026-02-27 | Webhook and notification design (consolidated) |
 <!-- INDEX:END -->
+
+## [2026-03-07-042936] VSIX handlers use prompt parameter for CLI flag parsing
+
+**Status**: Accepted
+
+**Context**: Functional parity audit found 6 handlers (agent, load, compact, sync, deps, recall) missing CLI flags
+
+**Decision**: VSIX handlers use prompt parameter for CLI flag parsing
+
+**Rationale**: Each handler now receives prompt string and parses --budget, --format, --raw, --archive, --dry-run, --external, --type from natural language input
+
+**Consequences**: All handler call sites (dispatch switch + freeform) must pass request.prompt; tests need 4-arg signatures
+
+---
 
 ## [2026-03-07] Windows test compat: fix production code and tests, no build tags
 

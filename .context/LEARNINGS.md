@@ -3,55 +3,71 @@
 <!-- INDEX:START -->
 | Date | Learning |
 |------|--------|
-| 2026-03-07 | Windows Go test compat requires 7 categories of fixes: HOME→USERPROFILE, .exe suffix, filepath separators, file handle leaks, t.TempDir LIFO ordering, TZ env var ignored, permission bits unsupported |
-| 2026-03-07 | PowerShell Set-Content and -replace corrupt UTF-8 files with non-ASCII — use Go or [System.IO.File]::WriteAllText with UTF8 no-BOM instead |
-| 2026-03-07 | time.Local on Windows ignores TZ env var set via os.Setenv/t.Setenv — must set time.Local directly |
-| 2026-03-06 | Copilot Chat JSONL uses kind=0 snapshots and kind=1/2 patches for incremental updates |
-| 2026-03-06 | VS Code --install-extension fails with EPERM when editor is running and extension is active |
-| 2026-03-05 | CI checks can diverge from local: DCO requires --signoff, goconst differs Linux vs Windows, Test job lacks golangci-lint |
-| 2026-03-04 | CONSTITUTION hook compliance is non-negotiable — don't work around it |
-| 2026-03-04 | nolint:errcheck in tests normalizes unchecked errors for agents |
-| 2026-03-04 | golangci-lint v2 ignores inline nolint directives for some linters |
-| 2026-03-02 | Hook message registry test enforces exhaustive coverage of embedded templates |
-| 2026-03-02 | Existing Projects is ambiguous framing for migration notes |
-| 2026-03-02 | Claude Code JSONL model ID does not distinguish 200k from 1M context |
-| 2026-03-01 | Gosec G306 flags test file WriteFile with 0644 permissions |
-| 2026-03-01 | Converting PersistentPreRun to PersistentPreRunE changes exit behavior |
-| 2026-03-01 | Key path changes ripple across 15+ doc files and 2 skills |
-| 2026-03-01 | Test HOME isolation is required for user-level path functions |
-| 2026-03-01 | Skill enhancement is a documentation-heavy operation across 10+ files |
-| 2026-03-01 | Task descriptions can be stale in reverse — implementation done but task not marked complete |
-| 2026-03-01 | Elevating private skills requires synchronized updates across 6 layers |
-| 2026-03-01 | Model-to-window mapping requires ordered prefix matching |
-| 2026-03-01 | Removing embedded asset directories requires synchronized cleanup across 5+ layers |
-| 2026-03-01 | Absorbing shell scripts into Go commands creates a discoverability gap |
-| 2026-03-01 | TASKS.md template checkbox syntax inside HTML comments is parsed by RegExTaskMultiline |
-| 2026-03-01 | Hook logs had no rotation; event log already did |
-| 2026-02-28 | ctx pad import, ctx pad export, and ctx system resources make three hack scripts redundant |
-| 2026-02-28 | Getting-started docs assumed Claude Code as the only agent |
-| 2026-02-28 | Plugin reload script must rebuild cache, not just delete it |
-| 2026-02-27 | site/ directory must be committed with docs changes |
-| 2026-02-27 | Doctor token_budget vs context_window confusion |
-| 2026-02-27 | Drift detector false positives on illustrative code examples |
-| 2026-02-27 | Context injection and compliance strategy (consolidated) |
-| 2026-02-26 | Webhook silence after ctxrc profile swap is the most common notify debugging red herring |
-| 2026-02-26 | Documentation drift and auditing (consolidated) |
-| 2026-02-26 | Agent context loading and task routing (consolidated) |
-| 2026-02-26 | Go testing patterns (consolidated) |
-| 2026-02-26 | PATH and binary handling (consolidated) |
-| 2026-02-26 | Task management and exit criteria (consolidated) |
-| 2026-02-26 | Agent behavioral patterns (consolidated) |
-| 2026-02-26 | Hook compliance and output routing (consolidated) |
-| 2026-02-26 | ctx add and decision recording (consolidated) |
-| 2026-02-24 | CLI tools don't benefit from in-memory caching of context files |
-| 2026-02-22 | Hook behavior and patterns (consolidated) |
-| 2026-02-22 | UserPromptSubmit hook output channels (consolidated) |
-| 2026-02-22 | Linting and static analysis (consolidated) |
-| 2026-02-22 | Permission and settings drift (consolidated) |
-| 2026-02-22 | Gitignore and filesystem hygiene (consolidated) |
-| 2026-02-19 | Feature can be code-complete but invisible to users |
-| 2026-01-28 | IDE is already the UI |
+| 2026-03-07 | Freeform handler keyword mappings must match handler signatures |
+| 2026-03-07 | splitArgs utility needed for handleAdd |
+| 2026-03-04 | CONSTITUTION hook compliance is non-negotiable — don't work around it |
+| 2026-03-04 | nolint:errcheck in tests normalizes unchecked errors for agents |
+| 2026-03-04 | golangci-lint v2 ignores inline nolint directives for some linters |
+| 2026-03-02 | Hook message registry test enforces exhaustive coverage of embedded templates |
+| 2026-03-02 | Existing Projects is ambiguous framing for migration notes |
+| 2026-03-02 | Claude Code JSONL model ID does not distinguish 200k from 1M context |
+| 2026-03-01 | Gosec G306 flags test file WriteFile with 0644 permissions |
+| 2026-03-01 | Converting PersistentPreRun to PersistentPreRunE changes exit behavior |
+| 2026-03-01 | Key path changes ripple across 15+ doc files and 2 skills |
+| 2026-03-01 | Test HOME isolation is required for user-level path functions |
+| 2026-03-01 | Skill enhancement is a documentation-heavy operation across 10+ files |
+| 2026-03-01 | Task descriptions can be stale in reverse — implementation done but task not marked complete |
+| 2026-03-01 | Elevating private skills requires synchronized updates across 6 layers |
+| 2026-03-01 | Model-to-window mapping requires ordered prefix matching |
+| 2026-03-01 | Removing embedded asset directories requires synchronized cleanup across 5+ layers |
+| 2026-03-01 | Absorbing shell scripts into Go commands creates a discoverability gap |
+| 2026-03-01 | TASKS.md template checkbox syntax inside HTML comments is parsed by RegExTaskMultiline |
+| 2026-03-01 | Hook logs had no rotation; event log already did |
+| 2026-02-28 | ctx pad import, ctx pad export, and ctx system resources make three hack scripts redundant |
+| 2026-02-28 | Getting-started docs assumed Claude Code as the only agent |
+| 2026-02-28 | Plugin reload script must rebuild cache, not just delete it |
+| 2026-02-27 | site/ directory must be committed with docs changes |
+| 2026-02-27 | Doctor token_budget vs context_window confusion |
+| 2026-02-27 | Drift detector false positives on illustrative code examples |
+| 2026-02-27 | Context injection and compliance strategy (consolidated) |
+| 2026-02-26 | Webhook silence after ctxrc profile swap is the most common notify debugging red herring |
+| 2026-02-26 | Documentation drift and auditing (consolidated) |
+| 2026-02-26 | Agent context loading and task routing (consolidated) |
+| 2026-02-26 | Go testing patterns (consolidated) |
+| 2026-02-26 | PATH and binary handling (consolidated) |
+| 2026-02-26 | Task management and exit criteria (consolidated) |
+| 2026-02-26 | Agent behavioral patterns (consolidated) |
+| 2026-02-26 | Hook compliance and output routing (consolidated) |
+| 2026-02-26 | ctx add and decision recording (consolidated) |
+| 2026-02-24 | CLI tools don't benefit from in-memory caching of context files |
+| 2026-02-22 | Hook behavior and patterns (consolidated) |
+| 2026-02-22 | UserPromptSubmit hook output channels (consolidated) |
+| 2026-02-22 | Linting and static analysis (consolidated) |
+| 2026-02-22 | Permission and settings drift (consolidated) |
+| 2026-02-22 | Gitignore and filesystem hygiene (consolidated) |
+| 2026-02-19 | Feature can be code-complete but invisible to users |
+| 2026-01-28 | IDE is already the UI |
 <!-- INDEX:END -->
+
+---
+
+## [2026-03-07-042950] Freeform handler keyword mappings must match handler signatures
+
+**Context**: multi_replace_string_in_file batch had 2 failures because freeform handler call sites had stale signatures after earlier replacements in same batch
+
+**Lesson**: When changing handler signatures in a batch edit, verify ALL call sites (dispatch switch AND freeform handler) are updated together; read file after batch to confirm
+
+**Application**: After multi-replacement batches, always read the target file to verify no stale call sites remain
+
+---
+
+## [2026-03-07-042943] splitArgs utility needed for handleAdd
+
+**Context**: handleAdd concatenated all parts into single content string, breaking decision/learning CLI flags
+
+**Lesson**: Use quote-aware arg splitting (regex: /(?:[^\s]+|[^]*)+/g) when Chat Participant must pass structured flags to CLI
+
+**Application**: Any handler that accepts multi-word quoted arguments with flags should use splitArgs, not naive split
 
 ---
 

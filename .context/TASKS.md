@@ -291,6 +291,8 @@ commands are invisible in non-ctx projects.
 **User-Facing Documentation** (from `ideas/done/REPORT-7-documentation.md`):
 Docs are feature-organized, not problem-organized. Key structural improvements:
 
+- [ ] Deploy VSIX parity fixes to Linux/Windows VMs (lintest/wintest) #priority:low #added:2026-03-07-043016
+
 - [ ] P0.6: Use-case page: "My AI Keeps Making the Same Mistakes" â€” problem-first
       page showcasing DECISIONS.md and CONSTITUTION.md. Partially covered in
       about.md but deserves standalone treatment as the #2 pain point.
