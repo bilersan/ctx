@@ -37,11 +37,14 @@ Subcommands:
   bootstrap            Print context location for AI agents
   message              Manage hook message templates (list/show/edit/reset)
 
+  stats                Show session token usage stats
+
 Plumbing subcommands (used by skills and automation):
   mark-journal         Update journal processing state
   mark-wrapped-up      Suppress checkpoint nudges after wrap-up
   pause                Pause context hooks for this session
   resume               Resume context hooks for this session
+  prune                Clean stale per-session state files
   events               Query the local hook event log
 
 Hook subcommands (Claude Code plugin — safe to run manually):
@@ -62,18 +65,21 @@ Hook subcommands (Claude Code plugin — safe to run manually):
   post-commit                 Post-commit context capture nudge
   qa-reminder                 QA reminder before completion
   specs-nudge                 Plan-to-specs directory nudge (PreToolUse)
+  check-memory-drift          Memory drift nudge (MEMORY.md changed)
   heartbeat                   Session heartbeat webhook (no stdout)`,
 	}
 
 	cmd.AddCommand(
 		backupCmd(),
 		resourcesCmd(),
+		statsCmd(),
 		bootstrapCmd(),
 		messageCmd(),
 		markJournalCmd(),
 		markWrappedUpCmd(),
 		pauseCmd(),
 		resumeCmd(),
+		pruneCmd(),
 		eventsCmd(),
 		contextLoadGateCmd(),
 		checkContextSizeCmd(),
@@ -92,6 +98,7 @@ Hook subcommands (Claude Code plugin — safe to run manually):
 		blockDangerousCommandsCmd(),
 		checkBackupAgeCmd(),
 		specsNudgeCmd(),
+		checkMemoryDriftCmd(),
 		heartbeatCmd(),
 	)
 

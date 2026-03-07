@@ -43,6 +43,18 @@
         <loc>https://ctx.ist/home/prompting-guide/</loc>
       </url>
       <url>
+        <loc>https://ctx.ist/home/repeated-mistakes/</loc>
+      </url>
+      <url>
+        <loc>https://ctx.ist/home/joining-a-project/</loc>
+      </url>
+      <url>
+        <loc>https://ctx.ist/home/keeping-ai-honest/</loc>
+      </url>
+      <url>
+        <loc>https://ctx.ist/home/faq/</loc>
+      </url>
+      <url>
         <loc>https://ctx.ist/recipes/guide-your-agent/</loc>
       </url>
       <url>
@@ -85,6 +97,9 @@
         <loc>https://ctx.ist/recipes/scratchpad-sync/</loc>
       </url>
       <url>
+        <loc>https://ctx.ist/recipes/memory-bridge/</loc>
+      </url>
+      <url>
         <loc>https://ctx.ist/recipes/hook-output-patterns/</loc>
       </url>
       <url>
@@ -124,6 +139,9 @@
         <loc>https://ctx.ist/recipes/parallel-worktrees/</loc>
       </url>
       <url>
+        <loc>https://ctx.ist/recipes/prompt-templates/</loc>
+      </url>
+      <url>
         <loc>https://ctx.ist/cli/</loc>
       </url>
       <url>
@@ -143,6 +161,9 @@
       </url>
       <url>
         <loc>https://ctx.ist/cli/doctor/</loc>
+      </url>
+      <url>
+        <loc>https://ctx.ist/cli/mcp/</loc>
       </url>
       <url>
         <loc>https://ctx.ist/cli/system/</loc>

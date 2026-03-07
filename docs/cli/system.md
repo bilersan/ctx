@@ -307,6 +307,93 @@ what hooks fired, when, and how often. Event logging is opt-in via
 [Auditing System Hooks](../recipes/system-hooks-audit.md),
 [`ctx doctor`](doctor.md#ctx-doctor)
 
+#### `ctx system stats`
+
+Show per-session token usage statistics. Reads stats JSONL files from
+`.context/state/stats-*.jsonl`, written automatically by the `check-context-size`
+hook on every prompt.
+
+```bash
+ctx system stats [flags]
+```
+
+**Flags**:
+
+| Flag        | Short | Type   | Default | Description                                  |
+|-------------|-------|--------|---------|----------------------------------------------|
+| `--follow`  | `-f`  | bool   | `false` | Stream new entries as they arrive             |
+| `--session` | `-s`  | string | *(all)* | Filter by session ID (prefix match)          |
+| `--last`    | `-n`  | int    | `20`    | Show last N entries                          |
+| `--json`    | `-j`  | bool   | `false` | Output raw JSONL (for piping to `jq`)        |
+
+**Text output**:
+
+```
+TIME                 SESSION   PROMPT    TOKENS  PCT  EVENT
+-------------------  --------  ------  --------  ----  ------------
+2026-03-05 10:00:05  abc12345       1      5k    2%  silent
+2026-03-05 10:01:12  abc12345       2     12k    6%  silent
+2026-03-05 10:15:30  abc12345      20     45k   22%  checkpoint
+```
+
+**Events**: `silent`, `checkpoint`, `window-warning`, `suppressed` (wrap-up active),
+`billing` (threshold exceeded).
+
+**Examples**:
+
+```bash
+# Recent stats across all sessions
+ctx system stats
+
+# Stream live token usage (like tail -f)
+ctx system stats --follow
+
+# Filter to current session
+ctx system stats --session abc12345
+
+# Raw JSONL for analysis
+ctx system stats --json | jq '.pct'
+
+# Monitor a long session in another terminal
+ctx system stats --follow --session abc12345
+```
+
+**See also**: [Auditing System Hooks](../recipes/system-hooks-audit.md)
+
+#### `ctx system prune`
+
+Clean stale per-session state files from `.context/state/`. Session hooks
+write tombstone files (context-check, heartbeat, persistence-nudge, etc.)
+that accumulate ~6-8 files per session with no automatic cleanup.
+
+```bash
+ctx system prune [flags]
+```
+
+**Flags**:
+
+| Flag     | Type | Default | Description                              |
+|----------|------|---------|------------------------------------------|
+| `--days` | int  | `7`     | Prune files older than this many days    |
+| `--dry-run` | bool | `false` | Show what would be pruned without deleting |
+
+Files are identified as session-scoped by UUID suffix (e.g.
+`heartbeat-a1b2c3d4-...`). Global files without UUIDs (`events.jsonl`,
+`memory-import.json`, etc.) are always preserved.
+
+!!! note "Safe to run anytime"
+    The worst outcome of pruning is a hook re-firing its nudge in the
+    next session. No context files, decisions, or learnings are stored
+    in the state directory.
+
+**Examples**:
+
+```bash
+ctx system prune                # Prune files older than 7 days
+ctx system prune --days 3       # More aggressive cleanup
+ctx system prune --dry-run      # Preview what would be removed
+```
+
 ---
 
 #### `ctx system mark-journal`
