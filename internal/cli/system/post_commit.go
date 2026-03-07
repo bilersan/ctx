@@ -74,6 +74,7 @@ func runPostCommit(cmd *cobra.Command, stdin *os.File) error {
 		" 1. Offer context capture to the user:" +
 		" Decision (design choice?), Learning (gotcha?), or Neither." +
 		" 2. Ask the user: \"Want me to run lints and tests before you push?\"" +
+		" Options: local (go test ./...), Linux VM (hack/lintest.ps1), Windows VM (hack/wintest.ps1), or all." +
 		" Do NOT push. The user pushes manually."
 	msg := loadMessage("post-commit", "nudge", nil, fallback)
 	if msg == "" {

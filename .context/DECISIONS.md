@@ -3,6 +3,7 @@
 <!-- INDEX:START -->
 | Date | Decision |
 |------|--------|
+| 2026-03-07 | Windows test compat: fix production code (filepath separators) and tests (7 categories), no platform-specific build tags |
 | 2026-03-06 | Copilot Chat session parser: auto-detect via JSONL content, not --caller flag |
 | 2026-03-06 | Caller-specific template overrides via embedded overrides/<caller>/ directory |
 | 2026-03-04 | Interface-based GraphBuilder for multi-ecosystem ctx deps |
@@ -24,6 +25,18 @@
 | 2026-02-26 | Security and permissions (consolidated) |
 | 2026-02-27 | Webhook and notification design (consolidated) |
 <!-- INDEX:END -->
+
+## [2026-03-07] Windows test compat: fix production code and tests, no build tags
+
+**Status**: Accepted
+
+**Context**: Go test suite had ~100+ failures on Windows 10. Needed to decide between platform-specific build tags vs. cross-platform code.
+
+**Decision**: Fix production code to be cross-platform (filepath.ToSlash for URLs/gitignore, strings.Split on "/" for Unix-origin paths) and make tests platform-aware (skip permission checks, use filepath.Separator in assertions, setLocalUTC helper). No build tags — all code compiles and runs on both platforms. 26 files changed, 3 production + 23 test files.
+
+**Consequences**: All 52 Go packages pass on Windows. Production paths use forward slashes for display/URLs but native separators for filesystem ops. Tests that check Unix-only features (file permissions) skip gracefully on Windows.
+
+---
 
 ## [2026-03-06] Copilot Chat session parser: auto-detect via JSONL content, not --caller flag
 

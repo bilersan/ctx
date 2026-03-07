@@ -1,0 +1,64 @@
+name: CI (Linux VM)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Prevent concurrent runs on the same VM
+concurrency:
+  group: lintest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit (Linux)
+    runs-on: [self-hosted, lintest]
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+
+      - name: Format check
+        run: test -z "$(gofmt -l .)" || (echo "Files need formatting:"; gofmt -l .; exit 1)
+
+      - name: Vet
+        run: go vet ./...
+        env:
+          CGO_ENABLED: '0'
+
+      - name: Lint drift
+        run: bash hack/lint-drift.sh
+
+      - name: Lint docs
+        run: bash hack/lint-docs.sh
+
+      - name: Check why docs
+        run: |
+          diff -q docs/index.md internal/assets/why/manifesto.md
+          diff -q docs/home/about.md internal/assets/why/about.md
+          diff -q docs/reference/design-invariants.md internal/assets/why/design-invariants.md
+
+      - name: Build
+        run: go build ./...
+        env:
+          CGO_ENABLED: '0'
+
+      - name: Test
+        run: go test -count=1 ./...
+        env:
+          CGO_ENABLED: '0'
+
+      - name: Smoke tests
+        run: bash hack/smoke-linux.sh
+        env:
+          CGO_ENABLED: '0'

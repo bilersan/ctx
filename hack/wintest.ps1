@@ -1,9 +1,11 @@
 <#
 .SYNOPSIS
-    Deploy ctx repo to wintest VM and run tests via WinRM.
+    Deploy ctx repo to wintest VM and run the full CI suite via WinRM.
 .DESCRIPTION
-    Copies the repo to the remote VM, then runs Go tests, VS Code extension
-    tests, and smoke tests. Returns a summary of results.
+    Copies the repo to the remote Windows VM via WinRM, then runs the full
+    test and audit suite: fmt check, vet, golangci-lint, lint-drift,
+    lint-docs, check-why, Go tests, VS Code tests, and smoke tests.
+    Mirrors the 'make check' / 'make audit' pipeline on a real Windows box.
 .PARAMETER ComputerName
     IP or hostname of the wintest VM. Default: 172.28.6.106
 .PARAMETER Username
@@ -11,7 +13,7 @@
 .PARAMETER Password
     Password for WinRM authentication.
 .PARAMETER TestScope
-    Which tests to run: all, go, vscode, smoke. Default: all
+    Which tests to run: all, go, lint, vscode, smoke. Default: all
 .PARAMETER RemotePath
     Destination path on the VM. Default: C:\ctx
 .PARAMETER SkipDeploy
@@ -21,7 +23,7 @@ param(
     [string]$ComputerName = "172.28.6.106",
     [string]$Username = "ersan",
     [string]$Password,
-    [ValidateSet("all", "go", "vscode", "smoke")]
+    [ValidateSet("all", "go", "lint", "vscode", "smoke")]
     [string]$TestScope = "all",
     [string]$RemotePath = "C:\ctx",
     [switch]$SkipDeploy
@@ -73,7 +75,7 @@ if (-not $SkipDeploy) {
     Write-Host "  Transferring to VM..."
     Copy-Item -Path $tarPath -Destination "C:\temp\ctx-deploy.tar" -ToSession $session -Force
 
-    # Extract on VM
+    # Extract on VM and strip CRLF from text files (gofmt expects LF)
     Write-Host "  Extracting on VM..."
     Invoke-Command -Session $session -ScriptBlock {
         param($p)
@@ -82,6 +84,12 @@ if (-not $SkipDeploy) {
         Set-Location $p
         tar xf "C:\temp\ctx-deploy.tar"
         Remove-Item "C:\temp\ctx-deploy.tar" -Force
+        # Convert CRLF to LF for text files (gofmt, bash scripts need LF)
+        Get-ChildItem -Recurse -Include *.go,*.sh,*.md,*.toml,*.yaml,*.yml,*.mod,*.sum -File | ForEach-Object {
+            $bytes = [System.IO.File]::ReadAllBytes($_.FullName)
+            $text = [System.Text.Encoding]::UTF8.GetString($bytes) -replace "`r`n", "`n"
+            [System.IO.File]::WriteAllBytes($_.FullName, [System.Text.Encoding]::UTF8.GetBytes($text))
+        }
     } -ArgumentList $RemotePath
 
     Remove-Item $tarPath -Force
@@ -108,7 +116,77 @@ function Run-RemoteTest {
     }
 }
 
-$results = @{}
+$results = [ordered]@{}
+
+# --- Lint / audit checks ---
+if ($TestScope -in @("all", "lint")) {
+    $results["Format Check"] = Run-RemoteTest "Format Check" {
+        param($p)
+        $ErrorActionPreference = 'Continue'
+        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+        Set-Location $p
+        $env:CGO_ENABLED = "0"
+        $bad = cmd /c "gofmt -l . 2>&1" | Where-Object { $_ -and $_ -notmatch '^vendor/' }
+        if ($bad) { throw "Files need formatting:`n$($bad -join "`n")" }
+        "Format OK"
+    }
+
+    $results["Go Vet"] = Run-RemoteTest "Go Vet" {
+        param($p)
+        $ErrorActionPreference = 'Continue'
+        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+        Set-Location $p
+        $env:CGO_ENABLED = "0"
+        cmd /c "go vet ./... 2>&1"
+        if ($LASTEXITCODE -ne 0) { throw "go vet failed" }
+        "Vet OK"
+    }
+
+    $results["Lint Drift"] = Run-RemoteTest "Lint Drift" {
+        param($p)
+        $ErrorActionPreference = 'Continue'
+        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+        Set-Location $p
+        $bash = Join-Path (Split-Path (Split-Path (Get-Command git).Source -Parent) -Parent) "bin\bash.exe"
+        $result = cmd /c "`"$bash`" -c `"cd /c/ctx && bash hack/lint-drift.sh`" 2>&1"
+        $result | ForEach-Object { $_ }
+        if ($LASTEXITCODE -ne 0) { throw "lint-drift failed" }
+    }
+
+    $results["Lint Docs"] = Run-RemoteTest "Lint Docs" {
+        param($p)
+        $ErrorActionPreference = 'Continue'
+        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+        Set-Location $p
+        $bash = Join-Path (Split-Path (Split-Path (Get-Command git).Source -Parent) -Parent) "bin\bash.exe"
+        $result = cmd /c "`"$bash`" -c `"cd /c/ctx && bash hack/lint-docs.sh`" 2>&1"
+        $result | ForEach-Object { $_ }
+        if ($LASTEXITCODE -ne 0) { throw "lint-docs failed" }
+    }
+
+    $results["Check Why Docs"] = Run-RemoteTest "Check Why Docs" {
+        param($p)
+        $ErrorActionPreference = 'Continue'
+        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+        Set-Location $p
+        $bash = Join-Path (Split-Path (Split-Path (Get-Command git).Source -Parent) -Parent) "bin\bash.exe"
+        $result = cmd /c "`"$bash`" -c `"cd /c/ctx && bash hack/check-why.sh`" 2>&1"
+        $result | ForEach-Object { $_ }
+        if ($LASTEXITCODE -ne 0) { throw "check-why failed" }
+    }
+
+    $results["Golangci-lint"] = Run-RemoteTest "Golangci-lint" {
+        param($p)
+        $ErrorActionPreference = 'Continue'
+        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+        Set-Location $p
+        $env:CGO_ENABLED = "0"
+        $gcl = Get-Command golangci-lint -ErrorAction SilentlyContinue
+        if (-not $gcl) { "SKIP: golangci-lint not installed"; return }
+        cmd /c "golangci-lint run --timeout=5m 2>&1"
+        if ($LASTEXITCODE -ne 0) { throw "golangci-lint failed" }
+    }
+}
 
 # --- Go tests ---
 if ($TestScope -in @("all", "go")) {
@@ -132,17 +210,6 @@ if ($TestScope -in @("all", "go")) {
         $env:CTX_SKIP_PATH_CHECK = "1"
         cmd /c "go test -v ./... 2>&1"
         if ($LASTEXITCODE -ne 0) { throw "go test failed" }
-    }
-
-    $results["Go Vet"] = Run-RemoteTest "Go Vet" {
-        param($p)
-        $ErrorActionPreference = 'Continue'
-        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
-        Set-Location $p
-        $env:CGO_ENABLED = "0"
-        cmd /c "go vet ./... 2>&1"
-        if ($LASTEXITCODE -ne 0) { throw "go vet failed" }
-        "Vet OK"
     }
 }
 
@@ -176,7 +243,7 @@ if ($TestScope -in @("all", "smoke")) {
 # --- Summary ---
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Test Summary" -ForegroundColor Cyan
+Write-Host "  Test Summary (Windows)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 $passed = 0; $total = 0

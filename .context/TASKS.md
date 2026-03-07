@@ -2,23 +2,23 @@
 
 <!--
 STRUCTURE RULES (see CONSTITUTION.md):
-- Tasks stay in their Phase section permanently — never move them
+- Tasks stay in their Phase section permanently â€” never move them
 - Use inline labels: #in-progress, #blocked, #priority:high
 - Mark completed: [x], skipped: [-] (with reason)
 - Never delete tasks, never remove Phase headers
 TASK STATUS LABELS:
-- `[ ]` — pending
-- `[x]` — completed
-- `[-]` — skipped (with reason)
-- `#in-progress` — currently being worked on (add inline, don't move task)
+- `[ ]` â€” pending
+- `[x]` â€” completed
+- `[-]` â€” skipped (with reason)
+- `#in-progress` â€” currently being worked on (add inline, don't move task)
 -->
 
 ### Phase -1: Quality Verification
 
-- [x] P-1.1: Update docs for user-level key path — 12+ files reference
+- [x] P-1.1: Update docs for user-level key path â€” 12+ files reference
   .context/.ctx.key; scratchpad-sync.md needs heaviest rewrite since scp
   instructions change completely #added:2026-03-01-161500 #done:2026-03-01
-- [x] P-1.2: Write "Building Project Skills" recipe — shows /ctx-skill-creator
+- [x] P-1.2: Write "Building Project Skills" recipe â€” shows /ctx-skill-creator
   end-to-end: identify repeating workflow, create skill, test, deploy. Add to
   recipe index and zensical.toml nav. #priority:medium #added:2026-03-01-125814 #done:2026-03-01
 
@@ -26,34 +26,34 @@ TASK STATUS LABELS:
   dependency trees. -- brainstorm about this, as it's virtually impossible to support
   all dependency models, and it will introduce bloat to ctx codebase; maybe
   a semantic approach is better. a follow-up question will be whether ctx deps
-  is really necessary. #done:2026-03-04 — Implemented multi-ecosystem deps: Go, Node.js, Python, Rust via GraphBuilder interface. ~40 lines per ecosystem, no bloat.
+  is really necessary. #done:2026-03-04 â€” Implemented multi-ecosystem deps: Go, Node.js, Python, Rust via GraphBuilder interface. ~40 lines per ecosystem, no bloat.
 
 - [x] ctx-skill-creator Markdown file does not refer to the references folder
-  of the skill. Is the agent smart enough to find it on its own? #done:2026-03-04 — Added explicit "Read references/anthropic-best-practices.md" section to SKILL.md; agent does not reliably discover references on its own
+  of the skill. Is the agent smart enough to find it on its own? #done:2026-03-04 â€” Added explicit "Read references/anthropic-best-practices.md" section to SKILL.md; agent does not reliably discover references on its own
 
-- [-] internal/claude/hooks/registry.go -> — truncated stub, intent unknown; registry is at internal/assets/hooks/messages/ and appears complete
+- [-] internal/claude/hooks/registry.go -> â€” truncated stub, intent unknown; registry is at internal/assets/hooks/messages/ and appears complete
 
-### Phase GK: Global Encryption Key — Spec: `specs/global-encryption-key.md`
+### Phase GK: Global Encryption Key â€” Spec: `specs/global-encryption-key.md`
 
 - [x] GK.0: Read specs/global-encryption-key.md before starting any GK task #added:2026-03-02-114146 #done:2026-03-02
-- [x] GK.1: Simplify keypath.go: replace KeyDir/ProjectKeySlug/ProjectKeyPath with GlobalKeyPath returning ~/.ctx/.ctx.key; simplify ResolveKeyPath to two-tier (project-override → global); add tilde expansion for override path #added:2026-03-02-114146 #done:2026-03-02
-- [x] GK.2: Rewrite MigrateKeyFile: consolidate ~/.local/ctx/keys/*.key → ~/.ctx/.ctx.key, promote project-local, handle legacy names, warn on key mismatch #added:2026-03-02-114146 #done:2026-03-02
+- [x] GK.1: Simplify keypath.go: replace KeyDir/ProjectKeySlug/ProjectKeyPath with GlobalKeyPath returning ~/.ctx/.ctx.key; simplify ResolveKeyPath to two-tier (project-override â†’ global); add tilde expansion for override path #added:2026-03-02-114146 #done:2026-03-02
+- [x] GK.2: Rewrite MigrateKeyFile: consolidate ~/.local/ctx/keys/*.key â†’ ~/.ctx/.ctx.key, promote project-local, handle legacy names, warn on key mismatch #added:2026-03-02-114146 #done:2026-03-02
 - [x] GK.3: Rewrite keypath_test.go and migrate_test.go for new two-tier resolution and migration #added:2026-03-02-114146 #done:2026-03-02
-- [x] GK.4: Update callers: pad_test.go and initialize_test.go — switch from ProjectKeyPath() to GlobalKeyPath() #added:2026-03-02-114146 #done:2026-03-02
+- [x] GK.4: Update callers: pad_test.go and initialize_test.go â€” switch from ProjectKeyPath() to GlobalKeyPath() #added:2026-03-02-114146 #done:2026-03-02
 - [x] GK.5: Update 12+ doc files referencing ~/.local/ctx/keys/ or slug-based key paths (see spec for full list) #added:2026-03-02-114146 #done:2026-03-02
-- [-] GK.6: Update ARCHITECTURE.md and DETAILED_DESIGN.md for new key resolution model — no references to old paths found in either file #added:2026-03-02-114146
+- [-] GK.6: Update ARCHITECTURE.md and DETAILED_DESIGN.md for new key resolution model â€” no references to old paths found in either file #added:2026-03-02-114146
 - [x] GK.7: Delete specs/user-level-dir-relocation.md (superseded by specs/global-encryption-key.md) #added:2026-03-02-114146 #done:2026-03-02
 - [x] GK.8: Record decision: global encryption key at ~/.ctx/.ctx.key replaces per-project slug keys #added:2026-03-02-114146 #done:2026-03-02
 
 - [x] Rebuild site/ for billing_token_warn docs changes #added:2026-03-02-165039
 
-- [x] Add PreToolUse hook to block direct ./hack/ and hack/ script invocations — nudge agent to use make targets instead. If no matching make target exists, suggest the user create one. Rationale: make targets are a controlled interface; direct script calls bypass dependency chains and are harder to audit. Similar pattern to existing block-non-path-ctx hook. #priority:low #added:2026-03-04-022129 #done:2026-03-04
+- [x] Add PreToolUse hook to block direct ./hack/ and hack/ script invocations â€” nudge agent to use make targets instead. If no matching make target exists, suggest the user create one. Rationale: make targets are a controlled interface; direct script calls bypass dependency chains and are harder to audit. Similar pattern to existing block-non-path-ctx hook. #priority:low #added:2026-03-04-022129 #done:2026-03-04
 
-- [x] Add alphabetical sorting to ctx-sanitize-permissions — sort allow and deny entries in settings.local.json for easier visual scanning. Group by tool prefix (Bash, Skill, WebFetch, etc.) then sort within each group. #priority:low #added:2026-03-04-021823 #done:2026-03-04
+- [x] Add alphabetical sorting to ctx-sanitize-permissions â€” sort allow and deny entries in settings.local.json for easier visual scanning. Group by tool prefix (Bash, Skill, WebFetch, etc.) then sort within each group. #priority:low #added:2026-03-04-021823 #done:2026-03-04
 
-- [x] Deduplicate settings.local.json permission entries — ctx init seeds bare forms (e.g., Skill(ctx-journal-enrich-all)) but Claude Code accumulates fully-qualified duplicates (ctx:ctx-* and ctx:ctx-*:*). Consider adding dedup logic to ctx-sanitize-permissions or to the mergePermissions function in ctx init. #priority:low #added:2026-03-04-021524 #done:2026-03-04
+- [x] Deduplicate settings.local.json permission entries â€” ctx init seeds bare forms (e.g., Skill(ctx-journal-enrich-all)) but Claude Code accumulates fully-qualified duplicates (ctx:ctx-* and ctx:ctx-*:*). Consider adding dedup logic to ctx-sanitize-permissions or to the mergePermissions function in ctx init. #priority:low #added:2026-03-04-021524 #done:2026-03-04
 
-- [x] P-1.3: Audit all skills against Anthropic prompting best practices — #done:2026-03-04
+- [x] P-1.3: Audit all skills against Anthropic prompting best practices â€” #done:2026-03-04
   use `/_ctx-skill-audit` to pass through all 30+ skills with lens
   from `ideas/claude-best-practices.md`. Key checks: (1) positive instructions
   over negative ("do X" not "don't Y"), (2) XML tag structure for mixed content,
@@ -65,29 +65,29 @@ TASK STATUS LABELS:
   #priority:medium #added:2026-03-01
 
 
-- [x] P-1.3a: Refresh plugin cache after skill promotion — run
+- [x] P-1.3a: Refresh plugin cache after skill promotion â€” run
   `hack/plugin-reload.sh` and restart session. Verify 6 promoted skills
   (ctx-brainstorm, ctx-check-links, ctx-sanitize-permissions, ctx-skill-creator,
   ctx-spec, ctx-verify) appear as `ctx:ctx-*` in autocomplete. Clean stale
   `Skill(_ctx-*)` entries from `.claude/settings.local.json`.
-  #priority:high #added:2026-03-02 #done:2026-03-04 — already registered and functional
-- [x] P-1.3b: Create `/ctx-skill-audit` bundled skill — new skill at
+  #priority:high #added:2026-03-02 #done:2026-03-04 â€” already registered and functional
+- [x] P-1.3b: Create `/ctx-skill-audit` bundled skill â€” new skill at
   `internal/assets/claude/skills/ctx-skill-audit/` with `SKILL.md` and
   `references/anthropic-best-practices.md` (condensed from
   `ideas/done/claude-best-practices.md`). The skill audits any skill file
   against Anthropic prompting best practices. Also add the same reference
   to `ctx-skill-creator/references/` so future skill creation gets the lens.
   Update `allow.txt`, `embed_test.go`, and run plugin-reload.sh.
-  #priority:medium #added:2026-03-02 #done:2026-03-04 — skill already existed with references
-- [x] P-1.3c: Audit all skills against Anthropic prompting best practices —
+  #priority:medium #added:2026-03-02 #done:2026-03-04 â€” skill already existed with references
+- [x] P-1.3c: Audit all skills against Anthropic prompting best practices â€”
   use `/ctx-skill-audit` to pass through all 39 bundled skills. Key checks:
   (1) positive instructions over negative ("do X" not "don't Y"),
   (2) XML tag structure for mixed content, (3) explain-the-why over rigid
   MUST/NEVER, (4) subagent-spawning skills guarded against overuse,
   (5) few-shot examples for non-trivial behaviors.
   Source: `ideas/done/claude-best-practices.md`
-  #priority:medium #added:2026-03-02 #done:2026-03-04 — audited all 49 skills (41 bundled + 8 live), fixed 27 skills across 30+ edits
-- [x] P-1.4: Update AGENT_PLAYBOOK.md with patterns from Anthropic best practices —
+  #priority:medium #added:2026-03-02 #done:2026-03-04 â€” audited all 49 skills (41 bundled + 8 live), fixed 27 skills across 30+ edits
+- [x] P-1.4: Update AGENT_PLAYBOOK.md with patterns from Anthropic best practices â€”
   three additions: (1) explicit mention of context window limits and the
   check-context-size hook in the "persist before continuing" guidance,
   (2) incremental progress chunking guidance for large tasks (not just
@@ -96,13 +96,13 @@ TASK STATUS LABELS:
   Source: agentic systems section of `ideas/claude-best-practices.md`
   #priority:medium #added:2026-03-01 #done:2026-03-01
 - [x] P-1.5: Document Claude Code JSONL session cleanup behavior in user-facing
-  docs — default 30-day retention, cleanupPeriodDays config, gotchas
+  docs â€” default 30-day retention, cleanupPeriodDays config, gotchas
   (0 disables writing, same-day deletion bug), and why journal export matters
   as archival mechanism. Add to docs/recipes/session-history.md or similar.
   #priority:medium #added:2026-02-28-132142 #done:2026-03-01
 
 
-- [x] P-1.6: Audit test coverage for export frontmatter preservation —
+- [x] P-1.6: Audit test coverage for export frontmatter preservation â€”
   verify T2.1.3 tests exist for: default preserves frontmatter,
   --force discards it, --skip-existing leaves file untouched, multipart
   preservation, malformed frontmatter graceful degradation.
@@ -119,14 +119,14 @@ Spec: `specs/user-level-dir-relocation.md`, `specs/state-consolidation.md`,
 
 **Init guard and state consolidation:**
 
-- [x] P-2.1: Add init guard to all ctx subcommands — `PersistentPreRunE` on
+- [x] P-2.1: Add init guard to all ctx subcommands â€” `PersistentPreRunE` on
   root command that checks `.context/` exists and contains required files.
   Exempt: `init`, `system bootstrap`, `hook`, `version`, `help`. Error:
   `ctx: not initialized. Run "ctx init" first.`
   Spec: `specs/state-consolidation.md` (Phase 1)
   #priority:high #added:2026-03-01 #done:2026-03-01
 
-- [x] P-2.2: Move session state from /tmp to .context/state/ — relocate agent
+- [x] P-2.2: Move session state from /tmp to .context/state/ â€” relocate agent
   cooldown tombstones and pause markers from `secureTempDir()` to
   `.context/state/`. Delete `secureTempDir()` from both `agent/cooldown.go`
   and `system/state.go`. Delete `cleanup-tmp` command and its SessionEnd
@@ -136,17 +136,17 @@ Spec: `specs/user-level-dir-relocation.md`, `specs/state-consolidation.md`,
 
 **User-level directory relocation:**
 
-- [-] P-2.3: Relocate user-level dir from ~/.local/ctx to ~/.ctx — superseded by Phase GK (global encryption key at ~/.ctx/.ctx.key)
+- [-] P-2.3: Relocate user-level dir from ~/.local/ctx to ~/.ctx â€” superseded by Phase GK (global encryption key at ~/.ctx/.ctx.key)
   Spec: `specs/user-level-dir-relocation.md`
   #priority:high #added:2026-03-01
 
-- [-] P-2.4: Update docs for ~/.ctx key path — superseded by GK.5 and GK.6
+- [-] P-2.4: Update docs for ~/.ctx key path â€” superseded by GK.5 and GK.6
   Spec: `specs/user-level-dir-relocation.md`
   #priority:high #added:2026-03-01
 
 **Task completion nudge:**
 
-- [x] P-2.5: Add task-completion nudge hook — PostToolUse on Edit/Write,
+- [x] P-2.5: Add task-completion nudge hook â€” PostToolUse on Edit/Write,
   debounced via `.context/state/edit-nudge-count` (fires every 5th edit).
   New `ctx system check-task-completion` command. Nudge text via RESULT
   channel: "If you completed a task, mark it [x] in TASKS.md." Configurable
@@ -163,12 +163,12 @@ directly instead of `make` targets.
 **Remaining candidates (from review):**
 
 - [x] P-0.5.1: Absorb `hack/pad-import-ideas.sh` into `ctx pad import --blobs [dir]`
-  — batch-import first-level files from a directory as scratchpad blobs.
+  â€” batch-import first-level files from a directory as scratchpad blobs.
   Currently a thin wrapper around `ctx pad add --file`; absorption is
-  straightforward. #priority:low #added:2026-03-01 #done:2026-03-04 — already implemented; hack script is redundant
+  straightforward. #priority:low #added:2026-03-01 #done:2026-03-04 â€” already implemented; hack script is redundant
 
 - [-] P-0.5.2: Evaluate `hack/context-watch.sh` for absorption as `ctx watch` or
-  `ctx system watch` — deleted instead; heartbeat now includes token telemetry
+  `ctx system watch` â€” deleted instead; heartbeat now includes token telemetry
   (tokens, context_window, usage_pct) making the watch script redundant.
   #priority:low #added:2026-03-01 #done:2026-03-01
 
@@ -177,39 +177,39 @@ directly instead of `make` targets.
 Spec: `specs/suppress-nudges-after-wrap-up.md`. Read the spec before starting
 any P0.9 task.
 
-**Phase 3 — Skill integration:**
+**Phase 3 â€” Skill integration:**
 
 - [x] P0.9.1: Promote CLI to top-level nav group in zensical.toml: Home | Recipes |
-  CLI | Reference | Operations | Security | Blog — CLI gets the split command
+  CLI | Reference | Operations | Security | Blog â€” CLI gets the split command
   pages, Reference keeps conceptual docs (skills, journal format, scratchpad,
   context files) #added:2026-02-24-204210 #done:2026-03-03
 
-- [-] P0.9.2: Split cli-reference.md — moved to Future
+- [-] P0.9.2: Split cli-reference.md â€” moved to Future
   #added:2026-02-24-204208
 
-- [-] P0.9.3: Investigate proactive content suggestions — moved to Future
+- [-] P0.9.3: Investigate proactive content suggestions â€” moved to Future
   #added:2026-02-24-185754
 
 ### Phase CP: Copilot Chat Session Parser for Recall
 
-- [x] CP.1: Implement CopilotParser — JSONL parser for VS Code Copilot Chat sessions
+- [x] CP.1: Implement CopilotParser â€” JSONL parser for VS Code Copilot Chat sessions
   supporting kind=0 snapshots and kind=1/2 patches, workspace.json resolution,
   tool invocation parsing, and multi-response reconstruction.
   Files: copilot.go, copilot_raw.go in internal/recall/parser/
   #added:2026-03-05 #done:2026-03-05
 
 - [x] CP.2: Register CopilotParser in parser registry and add CopilotSessionDirs()
-  to session discovery in query.go — scans Code and Code Insiders workspace storage.
+  to session discovery in query.go â€” scans Code and Code Insiders workspace storage.
   #added:2026-03-05 #done:2026-03-05
 
 - [x] CP.3: Add ToolCopilot constant to internal/config/file.go
   #added:2026-03-05 #done:2026-03-05
 
-- [x] CP.4: Fix Windows path validation — case-insensitive comparison
+- [x] CP.4: Fix Windows path validation â€” case-insensitive comparison
   with strings.EqualFold for validation/path.go
   #added:2026-03-05 #done:2026-03-05
 
-- [x] CP.5: Add --caller vscode flag to ctx init — gates Claude-specific
+- [x] CP.5: Add --caller vscode flag to ctx init â€” gates Claude-specific
   steps when called from VS Code extension. Caller-specific template
   overrides via internal/assets/overrides/<caller>/ directory.
   #added:2026-03-05 #done:2026-03-05
@@ -218,9 +218,9 @@ any P0.9 task.
 
 Spec: `specs/rss-feed.md`. Read the spec before starting any P0.8 task.
 
-**Phase 4 — Tests and integration:**
+**Phase 4 â€” Tests and integration:**
 
-- [-] P0.8.2: Investigate converting UserPromptSubmit hooks to JSON output —
+- [-] P0.8.2: Investigate converting UserPromptSubmit hooks to JSON output â€”
   Skipped: VERBATIM boxes ARE the feature (human-readable nudges injected into
   agent prompt). JSON would make them less useful. External tooling already gets
   structured JSON via webhooks. #added:2026-02-22-194446
@@ -230,14 +230,14 @@ Spec: `specs/rss-feed.md`. Read the spec before starting any P0.8 task.
   a version change. The hook should fire during commit or wrap-up to prevent
   version drift across the three files. #added:2026-02-22-102530 #done:2026-03-04
 
-- [x] P0.8.4: Regenerate site HTML after .ctxrc rename #added:2026-02-21-200039 #done:2026-03-04 — site regenerated in prior sessions
+- [x] P0.8.4: Regenerate site HTML after .ctxrc rename #added:2026-02-21-200039 #done:2026-03-04 â€” site regenerated in prior sessions
 
 ### Phase 0.4: Hook Message Templates
 
 Spec: `specs/future-complete/hook-message-templates.md`. Read the spec before
 starting any P0.4 task.
 
-**Phase 2 — Discoverability + documentation:**
+**Phase 2 â€” Discoverability + documentation:**
 
 Spec: `specs/future-complete/hook-message-customization.md`.
 
@@ -257,35 +257,35 @@ Ref: `ideas/plugin-enablement-gap.md`. Local-installed plugins get registered
 in `installed_plugins.json` but not auto-added to `enabledPlugins`, so slash
 commands are invisible in non-ctx projects.
 
-### Prompting Guide — Canonical Reference
+### Prompting Guide â€” Canonical Reference
 
-- [-] PG.1: Agent/tool compatibility matrix — moved to Future
+- [-] PG.1: Agent/tool compatibility matrix â€” moved to Future
       #priority:medium #added:2026-02-25
 
-- [-] PG.2: Versioning/stability note — moved to Future
+- [-] PG.2: Versioning/stability note â€” moved to Future
       #priority:low #added:2026-02-25
 
 ### Phase 0: Ideas (drift markers)
 
-- [-] P0.1: Standardize drift-check comment format — moved to Future. AI parses
+- [-] P0.1: Standardize drift-check comment format â€” moved to Future. AI parses
   ad-hoc markers fine; standardization benefits tooling/CLI but not urgent.
   #priority:medium #added:2026-02-28
 
 ### Phase 0: Ideas (from competitive analysis)
 
-- [x] P0.2: Brainstorm: JSON Schema for `.ctxrc` — ship a `json-schema.json` that
+- [x] P0.2: Brainstorm: JSON Schema for `.ctxrc` â€” ship a `json-schema.json` that
   gives IDE users autocompletion and validation for `.ctxrc`. Small YAML surface
   area; would catch silent typos like `scratchpad_encypt: true`.
   #priority:low #added:2026-02-28 #done:2026-03-03
 
-- [x] P0.3: Implement prompt templates (`ctx prompt`) — plain markdown files in
+- [x] P0.3: Implement prompt templates (`ctx prompt`) â€” plain markdown files in
   `.context/prompts/` invokable via `/ctx-prompt <name>` skill or `ctx prompt`
   CLI. `ctx init` stamps starter templates (code-review, refactor, explain).
   No frontmatter, no build step. Committed to git by default.
   Spec: `specs/prompt-templates.md`
   #priority:medium #added:2026-02-28 #done:2026-03-03
 
-- [x] P0.4: Brainstorm: Source-derived context as a complement to authored context —
+- [x] P0.4: Brainstorm: Source-derived context as a complement to authored context â€”
   auto-generate ARCHITECTURE.md skeleton from package dependency graph, or a
   "what changed since last session" summary from git diffs. Would not replace
    authored context but could bootstrap it. #priority:low #added:2026-02-28 #done:2026-03-03
@@ -295,17 +295,17 @@ commands are invisible in non-ctx projects.
 **User-Facing Documentation** (from `ideas/done/REPORT-7-documentation.md`):
 Docs are feature-organized, not problem-organized. Key structural improvements:
 
-- [ ] P0.6: Use-case page: "My AI Keeps Making the Same Mistakes" — problem-first
+- [ ] P0.6: Use-case page: "My AI Keeps Making the Same Mistakes" â€” problem-first
       page showcasing DECISIONS.md and CONSTITUTION.md. Partially covered in
       about.md but deserves standalone treatment as the #2 pain point.
       #priority:medium #source:report-7 #added:2026-02-17
 
-- [ ] P0.7: Use-case page: "Joining a ctx Project" — team onboarding guide. What
+- [ ] P0.7: Use-case page: "Joining a ctx Project" â€” team onboarding guide. What
       to read first, how to check context health, starting your first session,
       adding context, session etiquette, common pitfalls. Currently
       undocumented. #priority:medium #source:report-7 #added:2026-02-17
 
-- [ ] P0.8: Use-case page: "Keeping AI Honest" — unique ctx differentiator.
+- [ ] P0.8: Use-case page: "Keeping AI Honest" â€” unique ctx differentiator.
       Covers confabulation problem, grounded memory via context files,
       anti-hallucination rules in AGENT_PLAYBOOK, verification loop,
       ctx drift for detecting stale context. #priority:medium
@@ -317,7 +317,7 @@ Docs are feature-organized, not problem-organized. Key structural improvements:
       users are evaluating. #priority:low #source:report-7 #added:2026-02-17
 
 - [ ] P0.10: FAQ page: collect answers to common questions currently scattered
-      across docs — Why markdown? Does it work offline? What gets committed?
+      across docs â€” Why markdown? Does it work offline? What gets committed?
       How big should my token budget be? Why not a database?
       #priority:low #source:report-7 #added:2026-02-17
 
@@ -352,8 +352,8 @@ Spec: `specs/ctx-map.md`
 
 ### Docs: Knowledge Health
 
-- [ ] DK.1: Create recipe for knowledge health flow: nudge detection → review →
-      `/ctx-consolidate` → archive originals. The old `knowledge-scaling.md`
+- [ ] DK.1: Create recipe for knowledge health flow: nudge detection â†’ review â†’
+      `/ctx-consolidate` â†’ archive originals. The old `knowledge-scaling.md`
       recipe was deleted; this replaces it with the nudge-based approach.
       #priority:medium #added:2026-02-21
 - [ ] DK.2: Add consolidation cross-link to `knowledge-capture.md` "See also"
@@ -361,7 +361,7 @@ Spec: `specs/ctx-map.md`
 
 ## Later
 
-- [ ] P0.5: Blog: "Building a Claude Code Marketplace Plugin" — narrative from session
+- [ ] P0.5: Blog: "Building a Claude Code Marketplace Plugin" â€” narrative from session
       history, journals, and git diff of feat/plugin-conversion branch.
       Covers: motivation (shell hooks to Go subcommands), plugin directory
       layout, marketplace.json, eliminating make plugin, bugs found during
@@ -372,7 +372,7 @@ Spec: `specs/ctx-map.md`
 - [ ] P0.8.1: Install golangci-lint on the integration server #for-human
       #priority:medium #added:2026-02-23 #added:2026-02-23-170213
 - [ ] PM.1: Add topic-based navigation to blog when post count reaches 15+ #priority:low #added:2026-02-07-015054
-- [ ] PM.2: Revisit Recipes nav structure when count reaches ~25 — consider grouping
+- [ ] PM.2: Revisit Recipes nav structure when count reaches ~25 â€” consider grouping
       into sub-sections (Sessions, Knowledge, Security, Advanced) to reduce
       sidebar crowding. Currently at 18. #priority:low #added:2026-02-20
 - [ ] PM.3: Review hook diagnostic logs after a long session. Check
@@ -398,6 +398,16 @@ Spec: `specs/ctx-map.md`
       the "works with any AI tool" promise. Aider format is simpler than
       Claude Code's. #priority:medium #source:report-6 #added:2026-02-17
 
+### Windows Compatibility
+
+- [x] Deploy and test Go suite on Windows 10 Hyper-V VM (DESKTOP-027B8H2) —
+  built WinRM pipeline (hack/wintest.ps1), setup script (hack/wintest-setup.ps1),
+  smoke tests (hack/smoke-windows.ps1), CI workflow (.github/workflows/ci-windows.yml).
+  VS Code 53/53 ✓, Smoke 8/8 ✓. #added:2026-03-07 #done:2026-03-07
+- [x] Fix all Go test failures on Windows — 26 files changed across 7 root causes:
+  HOME→USERPROFILE, .exe suffix, filepath separators, file handle leaks,
+  t.TempDir LIFO cleanup ordering, TZ env var, permission bits.
+  Full suite passes (52 packages). #added:2026-03-07 #done:2026-03-07
 ## Future
 
 - [ ] P0.8.5: Enable webhook notifications in worktrees. Currently `ctx notify`
@@ -408,23 +418,23 @@ Spec: `specs/ctx-map.md`
       checkout, or copy the key into worktrees at creation time (ctx-worktree
       skill). #priority:medium #added:2026-02-22
 - [ ] P0.9.2: Split cli-reference.md (1633 lines) into command group pages:
-  cli-overview, cli-init-status, cli-context, cli-recall, cli-tools, cli-system —
+  cli-overview, cli-init-status, cli-context, cli-recall, cli-tools, cli-system â€”
   each page covers a natural command group with its subcommands and flags
   #added:2026-02-24-204208
 - [ ] P0.9.3: Investigate proactive content suggestions: docs/recipes/publishing.md claims
   agents suggest blog posts and journal rebuilds at natural moments, but no hook
-  or playbook mechanism exists to trigger this — either wire it up (e.g.
+  or playbook mechanism exists to trigger this â€” either wire it up (e.g.
   post-task-completion nudge) or tone down the docs to match reality
   #added:2026-02-24-185754
-- [ ] PG.1: Add agent/tool compatibility matrix to prompting guide — document which
+- [ ] PG.1: Add agent/tool compatibility matrix to prompting guide â€” document which
       patterns degrade gracefully when agents lack file access, CLI tools, or
       ctx integration. Treat as a "works best with / degrades to" table.
       #priority:medium #added:2026-02-25
-- [ ] PG.2: Add versioning/stability note to prompting guide — "these principles are
+- [ ] PG.2: Add versioning/stability note to prompting guide â€” "these principles are
       stable; examples evolve" + doc date in frontmatter. Needed once the guide
       becomes canonical and people start quoting it. #priority:low #added:2026-02-25
 - [ ] P0.1: Brainstorm: Standardize drift-check comment format and integrate with
-  `/ctx-drift` — formalize ad-hoc `<!-- drift-check: ... -->` markers, teach
+  `/ctx-drift` â€” formalize ad-hoc `<!-- drift-check: ... -->` markers, teach
   drift skill to parse/execute them, publish pattern in docs/recipes. Benefits
   tooling/CLI but AI handles ad-hoc fine for now. #priority:medium #added:2026-02-28
 - [ ] F.1: MCP server integration: expose context as tools/resources via Model
@@ -433,7 +443,7 @@ Spec: `specs/ctx-map.md`
 
 ### PR / CI Compliance
 
-- [x] Fix all pre-existing compliance test violations (PR #26) — SPDX headers
+- [x] Fix all pre-existing compliance test violations (PR #26) â€” SPDX headers
   (11 files), doc.go (19 packages), literal strings (44 files), cmd.Printf
   (45 files), golangci-lint staticcheck, goconst, TestGolangciLint CI skip,
   DCO sign-off. 108 files changed, 1390+/308-. Commit 39126cc.

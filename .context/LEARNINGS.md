@@ -3,6 +3,9 @@
 <!-- INDEX:START -->
 | Date | Learning |
 |------|--------|
+| 2026-03-07 | Windows Go test compat requires 7 categories of fixes: HOME→USERPROFILE, .exe suffix, filepath separators, file handle leaks, t.TempDir LIFO ordering, TZ env var ignored, permission bits unsupported |
+| 2026-03-07 | PowerShell Set-Content and -replace corrupt UTF-8 files with non-ASCII — use Go or [System.IO.File]::WriteAllText with UTF8 no-BOM instead |
+| 2026-03-07 | time.Local on Windows ignores TZ env var set via os.Setenv/t.Setenv — must set time.Local directly |
 | 2026-03-06 | Copilot Chat JSONL uses kind=0 snapshots and kind=1/2 patches for incremental updates |
 | 2026-03-06 | VS Code --install-extension fails with EPERM when editor is running and extension is active |
 | 2026-03-05 | CI checks can diverge from local: DCO requires --signoff, goconst differs Linux vs Windows, Test job lacks golangci-lint |
@@ -51,6 +54,24 @@
 <!-- INDEX:END -->
 
 ---
+
+## [2026-03-07] Windows Go test compat requires 7 categories of fixes
+
+**Context**: Deploying ctx Go test suite to a Windows 10 Hyper-V VM revealed ~100+ test failures across 10+ packages.
+
+**Lesson**: Windows Go test failures cluster into 7 categories: (1) `os.UserHomeDir()` checks `USERPROFILE` not `HOME` — every `t.Setenv("HOME", dir)` needs a matching `t.Setenv("USERPROFILE", dir)`; (2) built binaries need `.exe` suffix; (3) `filepath.Join` produces backslashes — use `filepath.ToSlash()` for URLs, .gitignore entries, and display paths; (4) Windows can't delete open file handles — `t.Cleanup(func() { f.Close() })` before TempDir cleanup; (5) `t.Cleanup` LIFO ordering — register `t.TempDir()` before `t.Cleanup(os.Chdir)` so Chdir runs first; (6) `t.Setenv("TZ", "UTC")` is ignored on Windows — set `time.Local = time.UTC` directly; (7) file permission bits (0600) are meaningless on Windows — skip those assertions.
+
+## [2026-03-07] PowerShell Set-Content and -replace corrupt UTF-8 files with non-ASCII
+
+**Context**: Mass-editing Go test files with PowerShell `(Get-Content) -replace | Set-Content` caused double-encoded UTF-8 (em dashes, arrows, icons became garbled).
+
+**Lesson**: PowerShell 5.1 `Set-Content -Encoding UTF8` adds BOM and re-encodes bytes through the active code page. For files with non-ASCII content (Unicode icons, em dashes in comments), use `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding $false))` or write a Go script that uses `os.ReadFile`/`os.WriteFile` which preserves raw bytes. The corruption manifests as double-encoded UTF-8: `E2 8F B1` (⏱) becomes `C3 A2 C2 8F C2 B1`.
+
+## [2026-03-07] time.Local on Windows ignores TZ env var set via os.Setenv/t.Setenv
+
+**Context**: `TestFormatJournalEntryPart_SinglePart` expected UTC-formatted times after `t.Setenv("TZ", "UTC")` but got UTC+3 on the Turkish Windows VM.
+
+**Lesson**: Go's `time.Local` is initialized once at startup from the OS timezone API on Windows. Calling `os.Setenv("TZ", "UTC")` after startup does NOT update `time.Local`. Fix: create a `setLocalUTC(t)` helper that sets `time.Local = time.UTC` directly and restores in `t.Cleanup`.
 
 ## [2026-03-06] Copilot Chat JSONL uses kind=0 snapshots and kind=1/2 patches for incremental updates
 
