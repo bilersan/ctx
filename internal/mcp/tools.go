@@ -230,7 +230,7 @@ func (s *Server) toolDrift(id json.RawMessage) *Response {
 			fmt.Fprintf(&sb, "  - [%s] %s: %s\n",
 				v.Type, v.File, v.Message)
 		}
-		sb.WriteString("\n")
+		sb.WriteString(config.NewlineLF)
 	}
 
 	if len(report.Warnings) > 0 {
@@ -239,7 +239,7 @@ func (s *Server) toolDrift(id json.RawMessage) *Response {
 			fmt.Fprintf(&sb, "  - [%s] %s: %s\n",
 				w.Type, w.File, w.Message)
 		}
-		sb.WriteString("\n")
+		sb.WriteString(config.NewlineLF)
 	}
 
 	if len(report.Passed) > 0 {

@@ -501,6 +501,7 @@ func TestCheckContextSize_SuppressedAfterWrapUp(t *testing.T) {
 func TestCheckContextSize_BillingFiresDuringWrapUp(t *testing.T) {
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
 
 	workDir := t.TempDir()
 	origDir, _ := os.Getwd()

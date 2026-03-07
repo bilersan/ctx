@@ -24,7 +24,7 @@ param(
     [string]$ComputerName = "172.28.8.112",
     [string]$Username = "ersan",
     [string]$Password,
-    [ValidateSet("all", "go", "lint", "vscode", "smoke")]
+    [ValidateSet("all", "go", "lint", "vscode", "mcp", "smoke")]
     [string]$TestScope = "all",
     [string]$RemotePath = "/home/ersan/ctx",
     [switch]$SkipDeploy
@@ -129,6 +129,11 @@ if ($TestScope -in @("all", "go")) {
 # --- VS Code extension tests ---
 if ($TestScope -in @("all", "vscode")) {
     $results["VS Code Tests"] = Run-SSHTest "VS Code Extension Tests" "$goEnv && cd editors/vscode && npm ci --silent 2>&1 && npm test 2>&1"
+}
+
+# --- MCP server tests ---
+if ($TestScope -in @("all", "mcp")) {
+    $results["MCP Server"] = Run-SSHTest "MCP Server" "$goEnv && bash hack/smoke-mcp.sh"
 }
 
 # --- Smoke tests ---

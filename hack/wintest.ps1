@@ -23,7 +23,7 @@ param(
     [string]$ComputerName = "172.28.6.106",
     [string]$Username = "ersan",
     [string]$Password,
-    [ValidateSet("all", "go", "lint", "vscode", "smoke")]
+    [ValidateSet("all", "go", "lint", "vscode", "mcp", "smoke")]
     [string]$TestScope = "all",
     [string]$RemotePath = "C:\ctx",
     [switch]$SkipDeploy
@@ -224,6 +224,21 @@ if ($TestScope -in @("all", "vscode")) {
         if ($LASTEXITCODE -ne 0) { throw "npm ci failed" }
         cmd /c "npm test 2>&1"
         if ($LASTEXITCODE -ne 0) { throw "npm test failed" }
+    }
+}
+
+# --- MCP server tests ---
+if ($TestScope -in @("all", "mcp")) {
+    $results["MCP Server"] = Run-RemoteTest "MCP Server" {
+        param($p)
+        $ErrorActionPreference = 'Continue'
+        $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+        Set-Location $p
+        $env:CGO_ENABLED = "0"
+        $bash = Join-Path (Split-Path (Split-Path (Get-Command git).Source -Parent) -Parent) "bin\bash.exe"
+        $result = cmd /c "`"$bash`" -c `"cd /c/ctx && bash hack/smoke-mcp.sh`" 2>&1"
+        $result | ForEach-Object { $_ }
+        if ($LASTEXITCODE -ne 0) { throw "MCP smoke tests failed" }
     }
 }
 

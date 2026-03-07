@@ -152,7 +152,7 @@ func (s *Server) readAgentPacket(
 		for _, name := range skipped {
 			fmt.Fprintf(&sb, "- %s (omitted for budget)\n", name)
 		}
-		sb.WriteString("\n")
+		sb.WriteString(config.NewlineLF)
 	}
 
 	return s.ok(id, ReadResourceResult{
