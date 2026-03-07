@@ -8,6 +8,23 @@ import * as https from "https";
 const PARTICIPANT_ID = "ctx.participant";
 const GITHUB_REPO = "ActiveMemory/ctx";
 
+/**
+ * Split a string into args, respecting double-quoted segments.
+ */
+function splitArgs(input: string): string[] {
+  const args: string[] = [];
+  const regex = /(?:[^\s"]+|"[^"]*")+/g;
+  let match;
+  while ((match = regex.exec(input)) !== null) {
+    let arg = match[0];
+    if (arg.startsWith('"') && arg.endsWith('"') && arg.length >= 2) {
+      arg = arg.slice(1, -1);
+    }
+    args.push(arg);
+  }
+  return args;
+}
+
 // Debug log file — written directly to disk so we can always read it
 const DEBUG_LOG_PATH = path.join(os.homedir(), "ctx-vscode-debug.log");
 function dbg(msg: string) {
@@ -410,12 +427,23 @@ async function handleStatus(
 
 async function handleAgent(
   stream: vscode.ChatResponseStream,
+  prompt: string,
   cwd: string,
   token: vscode.CancellationToken
 ): Promise<CtxResult> {
+  const args = ["agent", "--no-color"];
+  const parts = prompt.trim().split(/\s+/);
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i]?.toLowerCase();
+    if ((p === "--budget" || p === "budget") && parts[i + 1]) {
+      args.push("--budget", parts[++i]);
+    } else if ((p === "--format" || p === "format") && parts[i + 1]) {
+      args.push("--format", parts[++i]);
+    }
+  }
   stream.progress("Generating AI-ready context packet...");
   try {
-    const { stdout, stderr } = await runCtx(["agent", "--no-color"], cwd, token);
+    const { stdout, stderr } = await runCtx(args, cwd, token);
     const output = (stdout + stderr).trim();
     stream.markdown(output);
   } catch (err: unknown) {
@@ -450,12 +478,51 @@ async function handleRecall(
   cwd: string,
   token: vscode.CancellationToken
 ): Promise<CtxResult> {
-  stream.progress("Searching session history...");
+  const parts = prompt.trim().split(/\s+/);
+  const subcmd = parts[0]?.toLowerCase();
+  const rest = parts.slice(1);
+
+  let args: string[];
+  let progressMsg: string;
+
+  switch (subcmd) {
+    case "show":
+      args = rest.length ? ["recall", "show", ...rest] : ["recall", "show", "--latest"];
+      progressMsg = "Showing session details...";
+      break;
+    case "export":
+      args = ["recall", "export", "--all", ...rest];
+      progressMsg = "Exporting sessions...";
+      break;
+    case "lock":
+      args = rest.length ? ["recall", "lock", ...rest] : ["recall", "lock"];
+      progressMsg = "Locking journal entries...";
+      break;
+    case "unlock":
+      args = rest.length ? ["recall", "unlock", ...rest] : ["recall", "unlock", "--all"];
+      progressMsg = "Unlocking journal entries...";
+      break;
+    case "sync":
+      args = ["recall", "sync"];
+      progressMsg = "Syncing lock state...";
+      break;
+    case "list":
+      args = ["recall", "list", ...rest];
+      progressMsg = "Listing sessions...";
+      break;
+    default:
+      // No subcommand or unknown — default to list with optional query
+      args = ["recall", "list"];
+      if (subcmd) {
+        args.push("--query", prompt.trim());
+      }
+      progressMsg = "Searching session history...";
+      break;
+  }
+  args.push("--no-color");
+
+  stream.progress(progressMsg);
   try {
-    const args = ["recall", "list", "--no-color"];
-    if (prompt.trim()) {
-      args.push("--query", prompt.trim());
-    }
     const { stdout, stderr } = await runCtx(args, cwd, token);
     const output = (stdout + stderr).trim();
     if (output) {
@@ -518,31 +585,29 @@ async function handleAdd(
   cwd: string,
   token: vscode.CancellationToken
 ): Promise<CtxResult> {
-  const parts = prompt.trim().split(/\s+/);
-  const type = parts[0];
-  const content = parts.slice(1).join(" ");
+  const parts = splitArgs(prompt.trim());
+  const type = parts[0]?.toLowerCase();
 
   if (!type) {
     stream.markdown(
-      "**Usage:** `@ctx /add <type> <content>`\n\n" +
+      "**Usage:** `@ctx /add <type> <content> [flags]`\n\n" +
         "Types: `task`, `decision`, `learning`, `convention`\n\n" +
-        "Example: `@ctx /add task Implement user authentication`"
+        "**Task:** `@ctx /add task Implement auth --priority high`\n\n" +
+        "**Decision:**\n```\n@ctx /add decision \"Use PostgreSQL\" --context \"Need reliable DB\" --rationale \"ACID + JSON\" --consequences \"Team training\"\n```\n\n" +
+        "**Learning:**\n```\n@ctx /add learning \"Go embed trick\" --context \"Tried parent dir\" --lesson \"Same package only\" --application \"Put in internal/\"\n```"
     );
     return { metadata: { command: "add" } };
   }
 
   stream.progress(`Adding ${type}...`);
   try {
-    const args = ["add", type];
-    if (content) {
-      args.push(content);
-    }
+    const args = ["add", type, ...parts.slice(1), "--no-color"];
     const { stdout, stderr } = await runCtx(args, cwd, token);
     const output = (stdout + stderr).trim();
     if (output) {
       stream.markdown("```\n" + output + "\n```");
     } else {
-      stream.markdown(`Added **${type}**: ${content}`);
+      stream.markdown(`Added **${type}** entry.`);
     }
   } catch (err: unknown) {
     stream.markdown(
@@ -554,12 +619,23 @@ async function handleAdd(
 
 async function handleLoad(
   stream: vscode.ChatResponseStream,
+  prompt: string,
   cwd: string,
   token: vscode.CancellationToken
 ): Promise<CtxResult> {
+  const args = ["load", "--no-color"];
+  const parts = prompt.trim().split(/\s+/);
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i]?.toLowerCase();
+    if ((p === "--budget" || p === "budget") && parts[i + 1]) {
+      args.push("--budget", parts[++i]);
+    } else if (p === "--raw" || p === "raw") {
+      args.push("--raw");
+    }
+  }
   stream.progress("Loading assembled context...");
   try {
-    const { stdout, stderr } = await runCtx(["load", "--no-color"], cwd, token);
+    const { stdout, stderr } = await runCtx(args, cwd, token);
     const output = (stdout + stderr).trim();
     stream.markdown(output);
   } catch (err: unknown) {
@@ -572,12 +648,18 @@ async function handleLoad(
 
 async function handleCompact(
   stream: vscode.ChatResponseStream,
+  prompt: string,
   cwd: string,
   token: vscode.CancellationToken
 ): Promise<CtxResult> {
+  const args = ["compact", "--no-color"];
+  const lower = prompt.trim().toLowerCase();
+  if (lower.includes("archive") || lower.includes("--archive")) {
+    args.push("--archive");
+  }
   stream.progress("Compacting context...");
   try {
-    const { stdout, stderr } = await runCtx(["compact", "--no-color"], cwd, token);
+    const { stdout, stderr } = await runCtx(args, cwd, token);
     const output = (stdout + stderr).trim();
     if (output) {
       stream.markdown("```\n" + output + "\n```");
@@ -594,12 +676,18 @@ async function handleCompact(
 
 async function handleSync(
   stream: vscode.ChatResponseStream,
+  prompt: string,
   cwd: string,
   token: vscode.CancellationToken
 ): Promise<CtxResult> {
+  const args = ["sync", "--no-color"];
+  const lower = prompt.trim().toLowerCase();
+  if (lower.includes("dry-run") || lower.includes("--dry-run") || lower.includes("dry run")) {
+    args.push("--dry-run");
+  }
   stream.progress("Syncing context with codebase...");
   try {
-    const { stdout, stderr } = await runCtx(["sync", "--no-color"], cwd, token);
+    const { stdout, stderr } = await runCtx(args, cwd, token);
     const output = (stdout + stderr).trim();
     if (output) {
       stream.markdown("```\n" + output + "\n```");
@@ -1300,12 +1388,25 @@ async function handleLearnings(
 
 async function handleDeps(
   stream: vscode.ChatResponseStream,
+  prompt: string,
   cwd: string,
   token: vscode.CancellationToken
 ): Promise<CtxResult> {
+  const args = ["deps", "--no-color"];
+  const parts = prompt.trim().split(/\s+/);
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i]?.toLowerCase();
+    if ((p === "--format" || p === "format") && parts[i + 1]) {
+      args.push("--format", parts[++i]);
+    } else if ((p === "--type" || p === "type") && parts[i + 1]) {
+      args.push("--type", parts[++i]);
+    } else if (p === "--external" || p === "external") {
+      args.push("--external");
+    }
+  }
   stream.progress("Analyzing dependencies...");
   try {
-    const { stdout, stderr } = await runCtx(["deps", "--no-color"], cwd, token);
+    const { stdout, stderr } = await runCtx(args, cwd, token);
     const output = (stdout + stderr).trim();
     if (output) {
       stream.markdown("```\n" + output + "\n```");
@@ -1386,6 +1487,18 @@ async function handleFreeform(
   if (prompt.includes("status")) {
     return handleStatus(stream, cwd, token);
   }
+  if (prompt.includes("agent") || prompt.includes("context packet")) {
+    return handleAgent(stream, request.prompt, cwd, token);
+  }
+  if (prompt.includes("load") || prompt.includes("assembled")) {
+    return handleLoad(stream, request.prompt, cwd, token);
+  }
+  if (prompt.includes("compact") || prompt.includes("archive")) {
+    return handleCompact(stream, request.prompt, cwd, token);
+  }
+  if (prompt.includes("sync") || prompt.includes("reconcile")) {
+    return handleSync(stream, request.prompt, cwd, token);
+  }
   if (prompt.includes("drift")) {
     return handleDrift(stream, cwd, token);
   }
@@ -1438,7 +1551,7 @@ async function handleFreeform(
     return handleLearnings(stream, request.prompt, cwd, token);
   }
   if (prompt.includes("dep") || prompt.includes("dependency")) {
-    return handleDeps(stream, cwd, token);
+    return handleDeps(stream, request.prompt, cwd, token);
   }
   if (prompt.includes("journal") || prompt.includes("session")) {
     return handleJournal(stream, request.prompt, cwd, token);
@@ -1525,7 +1638,7 @@ const handler: vscode.ChatRequestHandler = async (
     case "status":
       return handleStatus(stream, cwd, token);
     case "agent":
-      return handleAgent(stream, cwd, token);
+      return handleAgent(stream, request.prompt, cwd, token);
     case "drift":
       return handleDrift(stream, cwd, token);
     case "recall":
@@ -1535,11 +1648,11 @@ const handler: vscode.ChatRequestHandler = async (
     case "add":
       return handleAdd(stream, request.prompt, cwd, token);
     case "load":
-      return handleLoad(stream, cwd, token);
+      return handleLoad(stream, request.prompt, cwd, token);
     case "compact":
-      return handleCompact(stream, cwd, token);
+      return handleCompact(stream, request.prompt, cwd, token);
     case "sync":
-      return handleSync(stream, cwd, token);
+      return handleSync(stream, request.prompt, cwd, token);
     case "complete":
       return handleComplete(stream, request.prompt, cwd, token);
     case "remind":
@@ -1571,7 +1684,7 @@ const handler: vscode.ChatRequestHandler = async (
     case "learnings":
       return handleLearnings(stream, request.prompt, cwd, token);
     case "deps":
-      return handleDeps(stream, cwd, token);
+      return handleDeps(stream, request.prompt, cwd, token);
     case "journal":
       return handleJournal(stream, request.prompt, cwd, token);
     case "reindex":
@@ -1691,6 +1804,13 @@ export {
   ensureCtxAvailable,
   bootstrap,
   getPlatformInfo,
+  splitArgs,
+  handleAdd,
+  handleAgent,
+  handleLoad,
+  handleCompact,
+  handleSync,
+  handleRecall,
   handleComplete,
   handleRemind,
   handleTasks,
